@@ -12,11 +12,11 @@ const userPool = new Pool({
 module.exports.createUser = function(userData, res) {
     const {username, password} = userData;
     if (username && password) {
-        userPool.query(`SELECT * FROM users WHERE username = '${username}'`, (error,results) => {
+        userPool.query(`SELECT * FROM users WHERE username = '${username}'`, (error,result) => {
             if (error) throw error;
 
-            if (results.rows.length === 0) {
-                userPool.query(`INSERT INTO users (username,password) VALUES ('${username}', '${password}')`, (error,results) => {
+            if (result.rows.length === 0) {
+                userPool.query(`INSERT INTO users (username,password) VALUES ('${username}', '${password}')`, (error,result) => {
                     if (error) throw error;
 
                     res.status(201).send("User created");
@@ -40,8 +40,8 @@ findByUsername(username, (err, user) => { // Look up user in the db
 })
 */
 module.exports.findByUsername = function(username, cb) {
-    userPool.query(`SELECT * FROM users WHERE username = '${username}'`, (error,results) => {
-        cb(error,results.rows[0]);
+    userPool.query(`SELECT * FROM users WHERE username = '${username}'`, (error,result) => {
+        cb(error,result.rows[0]);
     });
 }
 
@@ -52,8 +52,8 @@ userDB.findById(id, function (err, user) { // Look up user id in database
   });
 */
 module.exports.findById = function(id, cb) {
-    userPool.query(`SELECT * FROM users WHERE id = ${id}`, (error,results) => {
-        cb(error,results.rows[0]);
+    userPool.query(`SELECT * FROM users WHERE id = ${id}`, (error,result) => {
+        cb(error,result.rows[0]);
     });
 
 }
