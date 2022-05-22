@@ -21,6 +21,7 @@ app.use(
 );
 
 const userDB = require("./userDB.js");
+userDB.initialisePool(shoppePool);
 
 const PORT = 8080;
 
@@ -58,29 +59,72 @@ passport.deserializeUser((id, done) => {
 });
 
 
-app.post("/register", (req, res) => {
-  const { username, password } = req.body;
-  const newUser = userDB.createUser({ username, password }, res);
-});
-app.get("/login",
-  (req,res,next) => {res.redirect("product");});
-app.post("/login",
-  passport.authenticate("local", {failureRedirect: "/login"}),
-  (req, res) => {res.redirect("product");});
-app.get("/logout", (req, res) => {
-  req.logout(null,()=>{}); // added by Passport
-  res.redirect("/");
-});
-
 function authenticate(req,res,next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/login");
 }
-
 function authenticateAdmin(req,res,next) {
   if (req.isAuthenticated() && req.user.username == 'admin') return next();
-  res.redirect("/login");
+  res.status(400).send("only admin can perform this function!");
 }
+
+
+app.post("/register", (req, res) => {
+  const { name, email, username, password } = req.body;
+  const newUser = userDB.createUser({ name, email, username, password }, (status,msg) => {
+    req.logout(null,()=>{});
+    res.status(status).send(msg);});
+});
+app.get("/login",
+  (req,res,next) => {res.send("login here");});
+app.post("/login",
+  passport.authenticate("local", {failureRedirect: "/login"}),
+  (req, res) => {res.redirect("/user");});
+app.get("/logout", (req, res) => {
+  req.logout(null,()=>{});
+  res.redirect("/");
+});
+
+app.get("/user",
+  authenticate,
+  (req,res,next) => {
+    res.status(200).send(req.user.username);
+  }
+);
+app.get("/user/:username",
+  authenticate,
+  (req,res,next) => { // only allows a user to view their own profile
+    if (req.user.username === req.params.username) return next();
+    res.redirect("/product");
+  },
+  (req,res,next) => {
+    res.status(200).send(req.user);
+  }
+);
+app.put("/user/:username",
+  authenticate,
+  (req,res,next) => { // only allows a user to change their own username or password
+    if (req.user.username === req.params.username) return next();
+    res.redirect("/product");
+  },
+  (req,res,next) => {
+    userDB.updateUser(req.params.username,req.body,()=>{
+      req.logout(null,()=>{});
+      res.redirect("/");});
+  }
+);
+app.delete("/user/:username",
+  authenticate,
+  (req,res,next) => { // only allows a user to delete their own user account
+    if (req.user.username === req.params.username && req.user.password === req.body.password) return next();
+    res.redirect("/product");
+  },
+  (req,res,next) => {
+    userDB.deleteUser(req.params.username,()=>{
+      req.logout(null,()=>{});
+      res.redirect("/");});
+  }
+);
 
 
 // receive a product object: {name,description,quantity,price} and create a new product record UNLESS name, description and price match a pre-existing product.
@@ -156,73 +200,188 @@ app.delete("/deleteProduct",
 
 
 app.get("/product/:id",
-    (req,res,next) => {
-        shoppePool.query(`SELECT * FROM product WHERE id = ${req.params.id}`, (error, result) => {
-            if (error) throw error;
-            
-            res.status(200).send(result.rows);
-        });
-    }
+  (req,res,next) => {
+    shoppePool.query(`SELECT * FROM product WHERE id = ${req.params.id}`, (error, result) => {
+      if (error) throw error;
+      
+      res.status(200).send(result.rows);
+    });
+  }
 );
 app.get("/product",
-    (req,res,next) => {
-        shoppePool.query('SELECT * FROM product', (error, result) => {
-            if (error) throw error;
-            
-            res.status(200).send(result.rows);
-        });
-    }
+  (req,res,next) => {
+    shoppePool.query('SELECT * FROM product', (error, result) => {
+      if (error) throw error;
+      
+      res.status(200).send(result.rows);
+    });
+  }
 );
 
-app.post("/purchase",
-    authenticate,
-    (req,res,next) => {
-        /*
-            {"customer_id",
-             "sales":[
-                {"product_id",
-                 "quantity"}
-             ]
-            }
-        */
-        console.log(req.body);
+app.get("/cart",authenticate);
+app.get("/cart",
+  (req,res,next) => {
+    shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`, (error, result) => {
+      if (error) throw error;
 
-        // get new purchase ID
-        shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase", (error,result) => {
+      res.status(200).send(result.rows);
+    });
+  }
+);
+app.post("/cart", // add item to cart
+  (req,res,next) => {
+    if (!isNaN(req.body.productID) && !isNaN(req.body.quantity) && req.body.quantity > 0) {
+      shoppePool.query(`SELECT quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
+        if (error) throw error;
+
+        if (result.rows[0].quantity >= req.body.quantity) {
+          shoppePool.query(`INSERT INTO cart VALUES (${req.user.id}, ${req.body.productID}, ${req.body.quantity})`, (error, result) => {
+            if (error) throw error;
+    
+            res.redirect("/cart");
+          });
+        } else res.status(400).send("insufficient quantity in stock");
+      });
+    } else res.status(400).send("invalid productID or quantity");
+  }
+);
+app.put("/cart", // modify item quantity
+  (req,res,next) => {
+    if (!isNaN(req.body.productID) && !isNaN(req.body.quantity) && req.body.quantity > 0) {
+      shoppePool.query(`SELECT quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
+        if (error) throw error;
+
+        if (result.rows[0].quantity >= req.body.quantity) {
+          shoppePool.query(`UPDATE cart SET quantity = ${req.body.quantity} WHERE customer_id = ${req.user.id} AND product_id = ${req.body.productID}`, (error, result) => {
             if (error) throw error;
 
-            const newPurchaseID = result.rows[0].case;
-            const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            res.redirect("/cart");
+          });
+        } else res.status(400).send("insufficient quantity in stock");
+      });
+    } else res.status(400).send("invalid productID or quantity");
+  }
+);
+app.delete("/cart", // remove item from cart
+  (req,res,next) => {
+    shoppePool.query(`DELETE FROM cart WHERE customer_id = ${req.user.id} AND product_id = ${req.body.productID}`, (error, result) => {
+      if (error) throw error;
 
-            // create purchase object
-            shoppePool.query(`INSERT INTO purchase VALUES ((${newPurchaseID}),${req.body.customer_id},'${dateString}')`, (error,result) => {
+      res.redirect("/cart");
+    });
+  }
+);
+app.get("/cart/buy", // buy contents of cart
+  authenticate,
+  (req,res,next) => {
+    shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`, (error, result) => {
+      if (error) throw error;
+      
+      const customerID = result.rows[0].customer_id;
+      const sales = result.rows;
+      const completion = [];
+
+      // get new purchase ID
+      shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase", (error,result) => {
+        if (error) throw error;
+
+        const newPurchaseID = result.rows[0].case;
+        const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+        // create purchase object
+        shoppePool.query(`INSERT INTO purchase VALUES ((${newPurchaseID}),${customerID},'${dateString}')`, (error,result) => {
+          if (error) throw error;
+
+          for (const sale of sales) {
+            // check sufficient stock quantity
+            shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`, (error,result) => {
+              if (error) throw error;
+              
+              stockQuantity = result.rows[0].quantity;
+              if (stockQuantity >= sale.quantity) {
+                // delete cart record
+                shoppePool.query(`DELETE FROM cart WHERE customer_id = ${customerID} AND product_id = ${sale.product_id}`, (error, result) => {
+                  if (error) throw error;
+
+                  // reduce stock quantity
+                  shoppePool.query(`UPDATE product SET quantity = quantity-${sale.quantity} WHERE id = ${sale.product_id}`, (error,result) => {
+                    if (error) throw error;
+
+                    // add sale record
+                    const newSaleIDquery = "SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM sale";
+                    shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`, (error,result) => {
+                      if (error) throw error;
+
+                      completion.push(true);
+                      if (completion.length === sales.length) {
+                        if (completion.every(c => c)) res.status(201).send("purchase accepted");
+                        else res.status(201).send("some purchases failed");
+                      }
+                    });
+                  });
+                });
+              } else completion.push(false);
+            });
+          }
+        });
+      });
+    });
+  }
+);
+
+
+// DEPRECATED
+app.post("/purchase",
+  authenticate,
+  (req,res,next) => {
+    /*
+      {"customer_id",
+        "sales":[
+          {"product_id",
+            "quantity"}
+        ]
+      }
+    */
+    console.log(req.body);
+
+    // get new purchase ID
+    shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase", (error,result) => {
+      if (error) throw error;
+
+      const newPurchaseID = result.rows[0].case;
+      const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+      // create purchase object
+      shoppePool.query(`INSERT INTO purchase VALUES ((${newPurchaseID}),${req.body.customer_id},'${dateString}')`, (error,result) => {
+        if (error) throw error;
+
+        for (const sale of req.body.sales) {
+
+          // check sufficient stock quantity
+          shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`, (error,result) => {
+            if (error) throw error;
+            
+            stockQuantity = result.rows[0].quantity;
+            if (stockQuantity >= sale.quantity) {
+
+              // reduce stock quantity
+              shoppePool.query(`UPDATE product SET quantity = quantity-${sale.quantity} WHERE id = ${sale.product_id}`, (error,result) => {
                 if (error) throw error;
 
-                for (const sale of req.body.sales) {
+                // add sale record
+                const newSaleIDquery = "SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM sale";
+                shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`, (error,result) => {
+                  if (error) throw error;
 
-                    // check sufficient stock quantity
-                    shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`, (error,result) => {
-                        if (error) throw error;
-                        
-                        stockQuantity = result.rows[0].quantity;
-                        if (stockQuantity >= sale.quantity) {
-
-                            // reduce stock quantity
-                            shoppePool.query(`UPDATE product SET quantity = quantity-${sale.quantity} WHERE id = ${sale.product_id}`, (error,result) => {
-                                if (error) throw error;
-
-                                // add sale record
-                                const newSaleIDquery = "SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM sale";
-                                shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`);
-                            });
-                        }
-                    });
-                }
-            });
-
-            res.status(201).send("purchase accepted");
-        });
-    }
+                  res.status(201).send("purchase accepted");
+                });
+              });
+            } else res.status(400).send("insufficient quantity in stock");
+          });
+        }
+      });
+    });
+  }
 );
 
 app.listen(PORT, () => console.log("Shoppe running on http://localhost:"+PORT));
