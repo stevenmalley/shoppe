@@ -103,7 +103,7 @@ app.get("/user/:username",
 );
 app.put("/user/:username",
   authenticate,
-  (req,res,next) => { // only allows a user to change their own username or password
+  (req,res,next) => { // only allows a user to change their own user details
     if (req.user.username === req.params.username) return next();
     res.redirect("/product");
   },
@@ -218,7 +218,7 @@ app.get("/product",
   }
 );
 
-app.get("/cart",authenticate);
+app.use("/cart",authenticate);
 app.get("/cart",
   (req,res,next) => {
     shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`, (error, result) => {
@@ -271,12 +271,12 @@ app.delete("/cart", // remove item from cart
     });
   }
 );
-app.get("/cart/buy", // buy contents of cart
+app.get("/cart/checkout", // buy contents of cart
   authenticate,
   (req,res,next) => {
     shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`, (error, result) => {
       if (error) throw error;
-      
+
       const customerID = result.rows[0].customer_id;
       const sales = result.rows;
       const completion = [];
@@ -325,6 +325,32 @@ app.get("/cart/buy", // buy contents of cart
           }
         });
       });
+    });
+  }
+);
+
+app.use("/orders",authenticate);
+app.get("/orders",
+  (req,res,next) => {
+    shoppePool.query(`SELECT id,date FROM purchase WHERE customer_id = ${req.user.id}`, (error, result) => {
+      if (error) throw error;
+
+      res.status(200).send(result.rows);
+    });
+  }
+);
+app.get("/orders/:orderID",
+  (req,res,next) => {
+    shoppePool.query(`SELECT * FROM purchase WHERE id = ${req.params.orderID} AND customer_id = ${req.user.id}`, (error, result) => {
+      if (error) throw error;
+
+      if (result.rows.length > 0) {
+        shoppePool.query(`SELECT * FROM sale WHERE purchase_id = ${req.params.orderID}`, (error, result) => {
+          if (error) throw error;
+
+          res.status(200).send(result.rows);
+        });
+      } else res.status(400).send("order not made by customer "+req.user.name);
     });
   }
 );

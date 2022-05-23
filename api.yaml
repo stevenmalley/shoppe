@@ -1,0 +1,214 @@
+openapi: 3.0.1
+info:
+  title: Shoppe API
+  version: 1.0.0
+  description: Shoppe's online shop API.
+paths:
+  /register:
+    summary: register a new customer
+    post:
+      summary: accept user details for a new customer
+      description: ''
+      operationId: register new user
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /login:
+    summary: Allow a user to log in
+    post:
+      summary: Accept username and password credentials to allow log in
+      description: ''
+      operationId: log in
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+    get:
+      summary: Retrieve a page that allows logging in
+      description: ''
+      operationId: get log in page
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /logout:
+    summary: Allow a user to log out
+    get:
+      summary: Log out
+      description: ''
+      operationId: log out
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /user:
+    summary: Provides information about the user's account
+    get:
+      summary: Retrieve current logged in user account
+      description: ''
+      operationId: get username
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /user/:username:
+    summary: Perform operations on the logged in user account
+    get:
+      summary: Retrieve information about logged in user account
+      description: ''
+      operationId: get user details
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+    put:
+      summary: Modify user account details
+      description: ''
+      operationId: modify user details
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+    delete:
+      summary: Delete user account
+      description: ''
+      operationId: delete user account
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /orders:
+    summary: Retrieve information about logged in user's previous completed orders
+    get:
+      summary: Retrieve the logged in user's previous orders
+      description: ''
+      operationId: get previous orders
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /orders/:orderID:
+    summary: Retrieve details of a previous order
+    get:
+      summary: Retrieve details of a previous order by the logged in user
+      description: ''
+      operationId: get order details
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - User
+  /product:
+    summary: Retrieve product information
+    get:
+      summary: See all products
+      description: ''
+      operationId: get products
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+  /product/:id:
+    summary: See one product
+    get:
+      summary: See details of one product
+      description: ''
+      operationId: get product details
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+  /addProduct:
+    summary: Create a new product
+    post:
+      summary: Accept details of a new product and add to the database
+      description: ''
+      operationId: admin - add product
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+  /amendProduct:
+    summary: Modify a product's information
+    put:
+      summary: Change a product's information
+      description: ''
+      operationId: admin - modify product
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+  /deleteProduct:
+    summary: Delete a product from the store database
+    delete:
+      summary: Delete a product from the store database
+      description: ''
+      operationId: admin - delete product
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+  /cart:
+    summary: Customer shopping operations
+    get:
+      summary: Retrieve details of items in customer's cart
+      description: ''
+      operationId: get cart
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+    post:
+      summary: Add item to cart
+      description: ''
+      operationId: add item to cart
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+    put:
+      summary: Modify quantity of an item in the user's cart
+      description: ''
+      operationId: change cart quantity
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+    delete:
+      summary: Remove an item from the user's cart
+      description: ''
+      operationId: remove item from cart
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+  /cart/checkout:
+    summary: Process the user's purchase of items in the cart
+    get:
+      summary: Process the purchase of items in the user's cart
+      description: ''
+      operationId: checkout
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
