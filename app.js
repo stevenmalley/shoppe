@@ -128,7 +128,7 @@ app.delete("/user/:username",
 
 
 // receive a product object: {name,description,quantity,price} and create a new product record UNLESS name, description and price match a pre-existing product.
-app.post("/addProduct",
+app.post("/admin",
   authenticateAdmin,
   (req,res,next) => {
     const {name,description,quantity,price} = req.body;
@@ -154,47 +154,39 @@ app.post("/addProduct",
 );
 
 // if id matches a record in the db, amend any attributes (name, description, quantity, price)
-app.put("/amendProduct",
+app.put("/admin/:id",
   authenticateAdmin,
   (req,res,next) => {
-    let {id,name,description,quantity,price} = req.body;
-    if (!isNaN(id)) {
-      shoppePool.query(`SELECT * FROM product WHERE id = ${id}`, (error, result) => {
-        if (error) throw error;
+    let {name,description,quantity,price} = req.body;
+    shoppePool.query(`SELECT * FROM product WHERE id = ${req.params.id}`, (error, result) => {
+      if (error) throw error;
 
-        if (result.rows.length === 0) {
-          res.status(400).send(`product ID ${id} not found`);
-        } else {
-          name = name || result.rows[0].name;
-          description = description || result.rows[0].description;
-          quantity = quantity || result.rows[0].quantity;
-          price = price || result.rows[0].price;
-          shoppePool.query(`UPDATE product SET name = '${name}', description = '${description}', quantity = ${quantity}, price = '${price}' WHERE id = ${id}`, (error, result) => {
-            if (error) throw error;
+      if (result.rows.length === 0) {
+        res.status(400).send(`product ID ${req.params.id} not found`);
+      } else {
+        name = name || result.rows[0].name;
+        description = description || result.rows[0].description;
+        quantity = quantity || result.rows[0].quantity;
+        price = price || result.rows[0].price;
+        shoppePool.query(`UPDATE product SET name = '${name}', description = '${description}', quantity = ${quantity}, price = '${price}' WHERE id = ${req.params.id}`, (error, result) => {
+          if (error) throw error;
 
-            res.status(200).send(`product amended`);
-          });
-        }
-      });
-    } else {
-      res.status(400).send("no product ID given");
-    }
+          res.status(200).send(`product amended`);
+        });
+      }
+    });
   }
 );
 
-app.delete("/deleteProduct",
+app.delete("/admin/:id",
   authenticateAdmin,
   (req,res,next) => {
-    const id = req.body.id;
-    if (!isNaN(id)) {
-      shoppePool.query(`DELETE FROM product WHERE id = ${id}`, (error, result) => {
-        if (error) throw error;
+    const id = req.params.id;
+    shoppePool.query(`DELETE FROM product WHERE id = ${id}`, (error, result) => {
+      if (error) throw error;
 
-        res.status(300).send('product deleted');
-      });
-    } else {
-      res.status(400).send("no product ID given");
-    }
+      res.status(300).send('product deleted');
+    });
   }
 );
 

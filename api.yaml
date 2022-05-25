@@ -130,7 +130,7 @@ paths:
           description: Default error sample response
       tags:
         - Product
-  /addProduct:
+  /admin:
     summary: Create a new product
     post:
       summary: Accept details of a new product and add to the database
@@ -141,7 +141,7 @@ paths:
           description: Default error sample response
       tags:
         - Product
-  /amendProduct:
+  /admin/:id:
     summary: Modify a product's information
     put:
       summary: Change a product's information
@@ -152,8 +152,6 @@ paths:
           description: Default error sample response
       tags:
         - Product
-  /deleteProduct:
-    summary: Delete a product from the store database
     delete:
       summary: Delete a product from the store database
       description: ''
