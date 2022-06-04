@@ -1,19 +1,25 @@
 const express = require("express");
 const app = express();
 
+const dotenv = require("dotenv");
+dotenv.config(); // sets process.env with constants from .env
+
+const cors = require("cors");
+app.use(cors());
+
 const Pool = require('pg').Pool;
 const shoppePool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'shoppe',
-  password: 'password',
-  port: 5432,
+  user: process.env.USER,
+  host: process.env.HOST,
+  database: process.env.DATABASE,
+  password: process.env.PASSWORD,
+  port: process.env.DATABASE_PORT
 });
 
 const session = require("express-session");
 app.use(
   session({
-    secret: "fdjf73443HUDJuwe",
+    secret: process.env.EXPRESS_SECRET,
     cookie: {maxAge: 1000*60*5}, // 5 minutes
     resave: false, // if true, would force a session to be saved even when no data is modified
     saveUninitialized: false // if true, stores every new session
@@ -23,14 +29,14 @@ app.use(
 const userDB = require("./userDB.js");
 userDB.initialisePool(shoppePool);
 
-const PORT = 8080;
+const PORT = process.env.SERVER_PORT;
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
 app.get("/",
     (req,res,next) => {
-        res.status(200).send("Welcome to Shoppe");
+        res.status(200).send({message:"Welcome to Shoppe"});
     }
 );
 
@@ -204,7 +210,7 @@ app.get("/product",
   (req,res,next) => {
     shoppePool.query('SELECT * FROM product', (error, result) => {
       if (error) throw error;
-      
+      console.log("beep");
       res.status(200).send(result.rows);
     });
   }
@@ -343,61 +349,6 @@ app.get("/orders/:orderID",
           res.status(200).send(result.rows);
         });
       } else res.status(400).send("order not made by customer "+req.user.name);
-    });
-  }
-);
-
-
-// DEPRECATED
-app.post("/purchase",
-  authenticate,
-  (req,res,next) => {
-    /*
-      {"customer_id",
-        "sales":[
-          {"product_id",
-            "quantity"}
-        ]
-      }
-    */
-    console.log(req.body);
-
-    // get new purchase ID
-    shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase", (error,result) => {
-      if (error) throw error;
-
-      const newPurchaseID = result.rows[0].case;
-      const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-      // create purchase object
-      shoppePool.query(`INSERT INTO purchase VALUES ((${newPurchaseID}),${req.body.customer_id},'${dateString}')`, (error,result) => {
-        if (error) throw error;
-
-        for (const sale of req.body.sales) {
-
-          // check sufficient stock quantity
-          shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`, (error,result) => {
-            if (error) throw error;
-            
-            stockQuantity = result.rows[0].quantity;
-            if (stockQuantity >= sale.quantity) {
-
-              // reduce stock quantity
-              shoppePool.query(`UPDATE product SET quantity = quantity-${sale.quantity} WHERE id = ${sale.product_id}`, (error,result) => {
-                if (error) throw error;
-
-                // add sale record
-                const newSaleIDquery = "SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM sale";
-                shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`, (error,result) => {
-                  if (error) throw error;
-
-                  res.status(201).send("purchase accepted");
-                });
-              });
-            } else res.status(400).send("insufficient quantity in stock");
-          });
-        }
-      });
     });
   }
 );
