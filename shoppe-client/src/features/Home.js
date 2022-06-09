@@ -7,14 +7,7 @@ export default function Home() {
     const home = useSelector(selectHome);
     const dispatch = useDispatch();
 
-
-    useEffect(()=>{
-        async function getWelcome () {
-            await dispatch(retrieveWelcome());
-        }
-        getWelcome();
-    },[]);
+    useEffect(()=>{dispatch(retrieveWelcome())},[]);
     
-
     return <div>{home.message}</div>;
 }

@@ -11,17 +11,9 @@ export default function ProductPage() {
 
     const productID = useParams().productId;
 
-    useEffect(()=>{
-        async function getProduct() {
-            await dispatch(getOneProduct(productID));
-        }
-        getProduct();
-    },[]);
+    useEffect(()=>{dispatch(getOneProduct(productID))},[]);
 
     if (product.products.length > 0) {
-        return <div>{product.products.map(prod => <ProductDetails key={"productID"+prod.id} 
-                                                                    name={prod.name}
-                                                                    description={prod.description}
-                                                                    price={prod.price} />)}</div>;
+        return <div>{product.products.map(prod => <ProductDetails key={"productID"+prod.id} product={prod} />)}</div>;
     } else return <div>product {productID}</div>;
 }

@@ -8,18 +8,9 @@ export default function Products() {
     const product = useSelector(selectProducts);
     const dispatch = useDispatch();
 
-
-    useEffect(()=>{
-        async function getProducts() {
-            await dispatch(getAllProducts());
-        }
-        getProducts();
-    },[]);
+    useEffect(()=>{dispatch(getAllProducts())},[]);
 
     if (product.products.length > 0) {
-        return <div>{product.products.map(prod => <ProductDetails key={"productID"+prod.id}
-                                                                    name={prod.name}
-                                                                    description={prod.description}
-                                                                    price={prod.price} />)}</div>;
+        return <div>{product.products.map(prod => <ProductDetails key={"productID"+prod.id} product={prod} />)}</div>;
     } else return <div>products</div>;
 }

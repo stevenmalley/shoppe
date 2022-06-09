@@ -5,7 +5,18 @@ const dotenv = require("dotenv");
 dotenv.config(); // sets process.env with constants from .env
 
 const cors = require("cors");
-app.use(cors());
+const whitelist = [undefined,'http://localhost:3000'];
+const corsOptions = {
+  credentials: true, // This is important.
+  origin: (origin, callback) => {
+    if(whitelist.includes(origin))
+      return callback(null, true)
+
+      callback(new Error('Not allowed by CORS'));
+  }
+}
+app.use(cors(corsOptions));
+//app.use(cors());
 
 const Pool = require('pg').Pool;
 const shoppePool = new Pool({
@@ -20,7 +31,7 @@ const session = require("express-session");
 app.use(
   session({
     secret: process.env.EXPRESS_SECRET,
-    cookie: {maxAge: 1000*60*5}, // 5 minutes
+    cookie: {maxAge: 1000*60*5, httpOnly: false, secure: false}, // 5 minutes
     resave: false, // if true, would force a session to be saved even when no data is modified
     saveUninitialized: false // if true, stores every new session
   })
@@ -34,11 +45,11 @@ const PORT = process.env.SERVER_PORT;
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-app.get("/",
-    (req,res,next) => {
-        res.status(200).send({message:"Welcome to Shoppe"});
-    }
-);
+
+app.use((req,res,next) => {
+  console.log(req.method,req.path,req.body);
+  return next();
+});
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -67,13 +78,20 @@ passport.deserializeUser((id, done) => {
 
 function authenticate(req,res,next) {
   if (req.isAuthenticated()) return next();
-  res.redirect("/login");
+  res.status(401).send({"message":"NOT AUTHENTICATED"});
 }
 function authenticateAdmin(req,res,next) {
   if (req.isAuthenticated() && req.user.username == 'admin') return next();
-  res.status(400).send("only admin can perform this function!");
+  res.status(401).send("only admin can perform this function!");
 }
 
+
+
+app.get("/",
+  (req,res,next) => {
+    res.status(200).send({message:"Welcome to Shoppe"});
+  }
+);
 
 app.post("/register", (req, res) => {
   const { name, email, username, password } = req.body;
@@ -81,27 +99,27 @@ app.post("/register", (req, res) => {
     req.logout(null,()=>{});
     res.status(status).send(msg);});
 });
-app.get("/login",
+app.get("/login", // OBSOLETE ??
   (req,res,next) => {res.send("login here");});
 app.post("/login",
-  passport.authenticate("local", {failureRedirect: "/login"}),
+  passport.authenticate("local", {failureRedirect: "/user"}), // sets req.user
   (req, res) => {res.redirect("/user");});
 app.get("/logout", (req, res) => {
   req.logout(null,()=>{});
-  res.redirect("/");
+  res.send({message:"logged out"});
 });
 
 app.get("/user",
   authenticate,
   (req,res,next) => {
-    res.status(200).send(req.user.username);
+    res.status(200).send({"message":"AUTHENTICATED","username":req.user.username});
   }
 );
 app.get("/user/:username",
   authenticate,
   (req,res,next) => { // only allows a user to view their own profile
     if (req.user.username === req.params.username) return next();
-    res.redirect("/product");
+    res.status(400).send({"message":"DISALLOWED"});
   },
   (req,res,next) => {
     res.status(200).send(req.user);
@@ -111,7 +129,7 @@ app.put("/user/:username",
   authenticate,
   (req,res,next) => { // only allows a user to change their own user details
     if (req.user.username === req.params.username) return next();
-    res.redirect("/product");
+    res.status(400).send({"message":"DISALLOWED"});
   },
   (req,res,next) => {
     userDB.updateUser(req.params.username,req.body,()=>{
@@ -123,7 +141,7 @@ app.delete("/user/:username",
   authenticate,
   (req,res,next) => { // only allows a user to delete their own user account
     if (req.user.username === req.params.username && req.user.password === req.body.password) return next();
-    res.redirect("/product");
+    res.status(400).send({"message":"DISALLOWED"});
   },
   (req,res,next) => {
     userDB.deleteUser(req.params.username,()=>{
@@ -210,7 +228,7 @@ app.get("/product",
   (req,res,next) => {
     shoppePool.query('SELECT * FROM product', (error, result) => {
       if (error) throw error;
-      console.log("beep");
+      
       res.status(200).send(result.rows);
     });
   }
