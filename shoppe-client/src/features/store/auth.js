@@ -4,7 +4,6 @@ export const register = (user) => {
   return async (dispatch, getState) => {
     if (user.name && user.email && user.username && user.password) {
       const {name,email,username,password} = user;
-      console.log(JSON.stringify({name,email,username,password}));
       const response = await fetch(serverPath+"/register",
         {method: "POST", credentials:"include", headers: {"Content-Type":"application/json"}, body:JSON.stringify({name,email,username,password})});
    //   const jsonResponse = await response.json();
@@ -40,7 +39,6 @@ export const getUserAccount = (username) => {
     const response = await fetch(serverPath+"/user/"+username, {credentials:"include"});
     if (response.ok) {
       const jsonResponse = await response.json();
-      console.log(jsonResponse);
       dispatch({type: 'auth/getUserAccount', payload: jsonResponse});
     }
   }
@@ -48,7 +46,7 @@ export const getUserAccount = (username) => {
 
 export const logout = () => {
   return async (dispatch, getState) => {
-    await fetch(serverPath+"/logout");
+    await fetch(serverPath+"/logout", {credentials:"include"});
     dispatch({type:"auth/logout"});
   }
 };

@@ -27,6 +27,27 @@ const shoppePool = new Pool({
   port: process.env.DATABASE_PORT
 });
 
+const bcrypt = require("bcrypt");
+const passwordHash = async (password) => { // on user registration or password change
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password,salt);
+    return hash;
+  } catch (err) {
+    console.log(err);
+  }
+  return null;
+};
+const comparePasswords = async (password, hash) => { // on user login
+  try {
+    const matchFound = await bcrypt.compare(password, hash); // pulls salt out of hash and uses it to hash password
+    return matchFound;
+  } catch (err) {
+    console.log(err);
+  }
+  return false;
+};
+
 const session = require("express-session");
 app.use(
   session({
@@ -57,10 +78,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    userDB.findByUsername(username, (err, user) => { // Look up user in the db
+    userDB.findByUsername(username, async (err, user) => { // Look up user in the db
       if(err) return done(err); // If there's an error in db lookup, return err callback function
       if(!user) return done(null, false); // If user not found, return null and false in callback
-      if(user.password != password) return done(null, false); // If user found, but password not valid, return err and false in callback
+      const passwordCheck = await comparePasswords(user.password, password);
+      if(passwordCheck) return done(null, false); // If user found, but password not valid, return err and false in callback
       return done(null, user); // If user found and password valid, return the user object in callback
     });
   })
@@ -93,9 +115,10 @@ app.get("/",
   }
 );
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const { name, email, username, password } = req.body;
-  const newUser = userDB.createUser({ name, email, username, password }, (status,msg) => {
+  const hash = await passwordHash(password);
+  userDB.createUser({ name, email, username, hash }, (status,msg) => {
     req.logout(null,()=>{});
     res.status(status).send(msg);});
 });
@@ -122,7 +145,8 @@ app.get("/user/:username",
     res.status(400).send({"message":"DISALLOWED"});
   },
   (req,res,next) => {
-    res.status(200).send(req.user);
+    const {name,email,username} = req.user;
+    res.status(200).send(JSON.stringify({name,email,username}));
   }
 );
 app.put("/user/:username",

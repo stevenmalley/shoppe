@@ -1,19 +1,31 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { checkLogin, selectAuth } from './store/auth.js';
-import Account from './Account.js';
+import { getUserAccount, checkLogin, selectAuth } from './store/auth.js';
 
 const User = () => {
 
-  const isAuthenticated = useSelector(selectAuth).login;
+  const auth = useSelector(selectAuth);
   const dispatch = useDispatch();
 
-  //useEffect(()=>{dispatch(checkLogin())},[]);
+  useEffect(() => {
+    async function getAccountDetails() {
+      await dispatch(checkLogin());
+      if (auth.login) {
+        dispatch(getUserAccount(auth.username));
+      }
+    }
+    getAccountDetails();
+  },[]);
+  
 
-  if (isAuthenticated) {
+  if (auth.login) {
     
     return (
-      <Account />
+      <div>
+        username: {auth.username}<br />
+        name: {auth.name}<br />
+        email: {auth.email}
+      </div>
     );
   } else return (
     <div>not logged in</div>

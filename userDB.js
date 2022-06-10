@@ -7,13 +7,13 @@ module.exports.initialisePool = function(aPool) {
 
 // userDB.createUser({ username, password });
 module.exports.createUser = function(userData, cb) {
-    const {name, email, username, password} = userData;
-    if (name && email && username && password) {
+    const {name, email, username, hash} = userData;
+    if (name && email && username && hash) {
         pool.query(`SELECT * FROM customer WHERE username = '${username}' OR email = '${email}'`, (error,result) => {
             if (error) throw error;
 
             if (result.rows.length === 0) {
-                pool.query(`INSERT INTO customer (name,email,username,password) VALUES ('${name}', '${email}', '${username}', '${password}')`, (error,result) => {
+                pool.query(`INSERT INTO customer (name,email,username,password) VALUES ('${name}', '${email}', '${username}', '${hash}')`, (error,result) => {
                     if (error) throw error;
 
                     cb(201,"User created");

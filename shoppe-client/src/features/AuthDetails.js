@@ -7,12 +7,11 @@ import { selectAuth, checkLogin } from './store/auth.js';
 function AuthDetails() {
 
   const auth = useSelector(selectAuth);
-  const isAuthenticated = auth.login;
   const dispatch = useDispatch();
 
   useEffect(()=>{dispatch(checkLogin())},[]);
 
-  if (isAuthenticated) {
+  if (auth.login) {
     return (
       <div>
         <NavLink className="authDetails" to={"/user/"+auth.username}>user account</NavLink>
