@@ -10,7 +10,7 @@ export const getAllProducts = () => {
 
 export const getOneProduct = (id) => {
     return async (dispatch, getState) => {
-        const response = await fetch(`${serverPath}/product/${id}`);
+        const response = await fetch(`${serverPath}/product/${id}`,{credentials:"include"}); // send cookie for authentication to check if product is in cart
         const jsonResponse = await response.json();
         dispatch({type: 'product/oneProduct', payload: jsonResponse});
     }

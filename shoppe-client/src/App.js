@@ -11,11 +11,12 @@ import ProductPage from './features/ProductPage';
 import Register from './features/Register';
 import Login from './features/Login';
 import Logout from './features/Logout';
+import Cart from './features/Cart';
 import User from './features/User';
 import { authSlice } from './features/store/authSlice';
 import { homeSlice } from './features/store/homeSlice';
 import { productSlice } from './features/store/productSlice';
-import logo from './logo.svg';
+import { cartSlice } from './features/store/cartSlice';
 import './App.css';
 
 
@@ -23,7 +24,8 @@ const store = configureStore({
   reducer: combineReducers({
     auth:authSlice.reducer,
     home:homeSlice.reducer,
-    product:productSlice.reducer})
+    product:productSlice.reducer,
+    cart:cartSlice.reducer})
 });
 
 function App() {
@@ -39,14 +41,12 @@ function App() {
           <Route path="/product/:productId" element={<ProductPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/user/:userID" element={<User />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>
       </Provider>
       </Router>
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
     </div>
   );
 }

@@ -22,17 +22,26 @@ export const login = (username,password) => {
   }
 };
 
+/** AUTOMATIC LOGIN FOR TESTING */
+export const checkLogin0 = () => {
+  return login("mary","mary0");
+};
+
+/** REAL */
 export const checkLogin = () => {
   return async (dispatch, getState) => {
-    const response = await fetch(serverPath+"/user", {credentials:"include"});
-    if (response.ok) {
-      const jsonResponse = await response.json();
-      dispatch({type: 'auth/checkLogin', payload: jsonResponse});
-    } else {
-      dispatch({type: 'auth/checkLogin', payload: {message:""}});
+    let response;
+    try {
+      response = await fetch(serverPath+"/user", {credentials:"include"});
+    } catch (err) {console.log(err)}
+      if (response.ok) {
+        const jsonResponse = await response.json();
+        dispatch({type: 'auth/checkLogin', payload: jsonResponse});
+      } else {
+        dispatch({type: 'auth/checkLogin', payload: {message:""}});
+      }
     }
-  }
-};
+  };
 
 export const getUserAccount = (username) => {
   return async (dispatch, getState) => {

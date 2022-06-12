@@ -7,7 +7,7 @@
     color: #333;
 }
 
-.productName {
+.productDetails .productName {
     box-sizing: border-box;
     display: inline-block;
     width: 60%;
@@ -15,7 +15,7 @@
     font-size: 1.4em;
 }
 
-.productPrice {
+.productDetails .productPrice {
     box-sizing: border-box;
     display: inline-block;
     width: 40%;
@@ -24,10 +24,15 @@
     font-size: 1.2em;
 }
 
-.productDesc {
+.productDetails .productDesc {
     box-sizing: border-box;
     width: 100%;
     padding: 20px 2%;
     text-align: left;
     border-top: 1px solid #ccc;
+}
+
+.productDetails img {
+    max-height: 350px;
+    max-width: 250px;
 }

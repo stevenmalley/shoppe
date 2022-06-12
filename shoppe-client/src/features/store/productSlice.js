@@ -2,10 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const productOptions = {
   name: "product",
-  initialState: {products:[]},
+  initialState: [],
   reducers: {
-    allProducts:(product,action) => {product.products = action.payload},
-    oneProduct:(product,action) => {product.products = action.payload}
+    allProducts:(product,action) => action.payload,
+    oneProduct:(product,action) => [action.payload]
   }
 }
 

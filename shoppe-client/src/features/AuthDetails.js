@@ -14,6 +14,8 @@ function AuthDetails() {
   if (auth.login) {
     return (
       <div>
+        <span>Welcome {auth.name}</span>
+        <NavLink className="authDetails" to={"/cart"}>cart</NavLink>
         <NavLink className="authDetails" to={"/user/"+auth.username}>user account</NavLink>
         <NavLink className="authDetails" to="/logout">log out</NavLink>
       </div>

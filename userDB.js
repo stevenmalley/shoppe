@@ -7,13 +7,13 @@ module.exports.initialisePool = function(aPool) {
 
 // userDB.createUser({ username, password });
 module.exports.createUser = function(userData, cb) {
-    const {name, email, username, hash} = userData;
-    if (name && email && username && hash) {
+    const {name, email, username, password_hash} = userData;
+    if (name && email && username && password_hash) {
         pool.query(`SELECT * FROM customer WHERE username = '${username}' OR email = '${email}'`, (error,result) => {
             if (error) throw error;
 
             if (result.rows.length === 0) {
-                pool.query(`INSERT INTO customer (name,email,username,password) VALUES ('${name}', '${email}', '${username}', '${hash}')`, (error,result) => {
+                pool.query(`INSERT INTO customer (name,email,username,password_hash) VALUES ('${name}', '${email}', '${username}', '${password_hash}')`, (error,result) => {
                     if (error) throw error;
 
                     cb(201,"User created");
@@ -55,19 +55,40 @@ module.exports.findById = function(id, cb) {
 
 }
 
-module.exports.updateUser = function(username, newUserData, cb) {
+module.exports.updateUser = async function(username, newUserData, cb) {
+
+    let usernameTaken = false;
+    
+    if (newUserData.username && newUserData.username !== username) { // check that a new username is not already in use
+        await pool.query(`SELECT * FROM customer WHERE username = '${newUserData.username}'`, (error, result) => {
+            if (error) throw error;
+
+            if (result.rows.length > 0) { // if requested username is already in use, remove the request
+                delete newUserData.username;
+                usernameTaken = true;
+            }
+        });
+    }
+
     pool.query(`SELECT * FROM customer WHERE username = '${username}'`, (error,result) => {
         if (error) throw error;
 
-        const id = result.rows[0].id;
-        const newName = newUserData.name || result.rows[0].name;
-        const newEmail = newUserData.email || result.rows[0].email;
-        const newUsername = newUserData.username || result.rows[0].username;
-        const newPassword = newUserData.password || result.rows[0].password;
-        pool.query(`UPDATE customer SET name = '${newName}', email = '${newEmail}', username = '${newUsername}', password = '${newPassword}' WHERE id = ${id}`, (error,result) => {
+        const oldUserData = result.rows[0];
+
+        const id = oldUserData.id;
+        const newName = newUserData.name || oldUserData.name;
+        const newEmail = newUserData.email || oldUserData.email;
+        const newUsername = newUserData.username || oldUserData.username;
+        const newPassword = newUserData.password_hash || oldUserData.password_hash;
+        pool.query(`UPDATE customer SET name = '${newName}', email = '${newEmail}', username = '${newUsername}', password_hash = '${newPassword}' WHERE id = ${id}`, (error,result) => {
             if (error) throw error;
 
-            cb();
+            let changeMessage = "none updated";
+            const changed = ["name","email","username","password_hash"].filter(k => newUserData[k] && newUserData[k] !== oldUserData[k]);
+            console.log(newUserData.password_hash,oldUserData.password_hash);
+            if (changed.length > 0) changeMessage = changed.map(k => k === "password_hash" ? "password" : k).join(", ")+" updated";
+            if (usernameTaken) changeMessage += ", username already taken";
+            cb(changeMessage);
         });
     });
 }

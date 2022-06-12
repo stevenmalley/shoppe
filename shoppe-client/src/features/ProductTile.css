@@ -1,0 +1,44 @@
+.productTile {
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    min-height: 200px;
+    margin: 30px;
+    border: 1px solid grey;
+    text-decoration: none;
+    color: #333;
+}
+
+.productTile:hover {
+    background-color: rgb(170, 249, 255);
+}
+
+.productTile .productName {
+    box-sizing: border-box;
+    float: left;
+    width: 60%;
+    padding: 2% 5%;
+    font-size: 1.15em;
+}
+
+.productTile .productDesc {
+    box-sizing: border-box;
+    float: left;
+    width: 60%;
+    padding: 20px 2%;
+    text-align: left;
+}
+
+.productTile .productPrice {
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 0px;
+    right: 30px;
+    font-weight: bold;
+}
+
+.productTile img {
+    height: 150px;
+    width: 100px;
+    padding-top: 10px;
+}

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAllProducts, selectProducts } from './store/product.js';
-import ProductDetails from './ProductDetails';
+import ProductTile from './ProductTile';
 
 export default function Products() {
 
@@ -10,7 +10,7 @@ export default function Products() {
 
     useEffect(()=>{dispatch(getAllProducts())},[]);
 
-    if (product.products.length > 0) {
-        return <div>{product.products.map(prod => <ProductDetails key={"productID"+prod.id} product={prod} />)}</div>;
+    if (product.length > 0) {
+        return <div>{product.map(prod => <ProductTile key={"productID"+prod.id} product={prod} />)}</div>;
     } else return <div>products</div>;
 }

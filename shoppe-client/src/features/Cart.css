@@ -1,0 +1,26 @@
+.cart-item {
+  max-width: 300px;
+  border: 1px solid grey;
+  margin: 12px auto;
+}
+
+.cart-item-link {
+  display: block;
+  padding: 5px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+}
+
+.cart-item-link:hover {
+  background-color: rgb(170, 249, 255);
+}
+
+.cart-item-modify {
+  display: block;
+  padding: 5px;
+}
+
+.cart-item-modify button {
+  margin: 0 10px;
+}

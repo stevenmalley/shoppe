@@ -1,18 +1,16 @@
 import { Link } from 'react-router-dom';
 import { serverPath } from '../config';
-import ModifyCart from './ModifyCart';
-import './ProductDetails.css';
+import './ProductTile.css';
 
 
-export default function ProductDetails(props) {
-    
+export default function ProductTile(props) {
+
     return (
-        <div className="productDetails">
+        <Link to={`/product/${props.product.id}`} className="productTile">
             <div className="productName">{props.product.name}</div>
-            <div className="productPrice">{props.product.price}</div>
             <div className="productDesc">{props.product.description}</div>
+            <div className="productPrice">{props.product.price}</div>
             <img src={`${serverPath}/productImages/${props.product.image}`}  alt={props.product.name} />
-            <ModifyCart productID={props.product.id} />
-        </div>
+        </Link>
     );
 }

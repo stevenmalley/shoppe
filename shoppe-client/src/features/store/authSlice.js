@@ -11,6 +11,7 @@ const authOptions = {
       if (action.payload.message === "AUTHENTICATED") {
         auth.login = true;
         auth.username = action.payload.username;
+        auth.name = action.payload.name;
       } else return {login:false};
     },
     checkLogin:(auth,action) => {

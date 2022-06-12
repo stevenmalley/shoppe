@@ -81,8 +81,8 @@ passport.use(new LocalStrategy(
     userDB.findByUsername(username, async (err, user) => { // Look up user in the db
       if(err) return done(err); // If there's an error in db lookup, return err callback function
       if(!user) return done(null, false); // If user not found, return null and false in callback
-      const passwordCheck = await comparePasswords(user.password, password);
-      if(passwordCheck) return done(null, false); // If user found, but password not valid, return err and false in callback
+      const passwordCheck = await comparePasswords(password, user.password_hash);
+      if(!passwordCheck) return done(null, false); // If user found, but password not valid, return err and false in callback
       return done(null, user); // If user found and password valid, return the user object in callback
     });
   })
@@ -100,42 +100,44 @@ passport.deserializeUser((id, done) => {
 
 function authenticate(req,res,next) {
   if (req.isAuthenticated()) return next();
-  res.status(401).send({"message":"NOT AUTHENTICATED"});
+  res.status(200).send({"message":"NOT AUTHENTICATED"});
 }
 function authenticateAdmin(req,res,next) {
   if (req.isAuthenticated() && req.user.username == 'admin') return next();
-  res.status(401).send("only admin can perform this function!");
+  res.status(200).send({"message":"only admin can perform this function!"});
 }
 
 
 
 app.get("/",
   (req,res,next) => {
-    res.status(200).send({message:"Welcome to Shoppe"});
+    res.status(200).send({"message":"Welcome to Shoppe"});
   }
 );
 
 app.post("/register", async (req, res) => {
   const { name, email, username, password } = req.body;
-  const hash = await passwordHash(password);
-  userDB.createUser({ name, email, username, hash }, (status,msg) => {
+  const password_hash = await passwordHash(password);
+  userDB.createUser({ name, email, username, password_hash }, (status,msg) => {
     req.logout(null,()=>{});
     res.status(status).send(msg);});
 });
+
 app.get("/login", // OBSOLETE ??
   (req,res,next) => {res.send("login here");});
-app.post("/login",
+app.post("/login", // receives {username,password}
+  (req,res,next) => {req.logout(null,()=>{});next()}, // close a previous session
   passport.authenticate("local", {failureRedirect: "/user"}), // sets req.user
-  (req, res) => {res.redirect("/user");});
+  (req,res) => {res.redirect("/user");});
 app.get("/logout", (req, res) => {
   req.logout(null,()=>{});
   res.send({message:"logged out"});
 });
 
-app.get("/user",
+app.get("/user", // used for checking login (NB requires cookie)
   authenticate,
   (req,res,next) => {
-    res.status(200).send({"message":"AUTHENTICATED","username":req.user.username});
+    res.status(200).send({"message":"AUTHENTICATED","username":req.user.username,"name":req.user.name});
   }
 );
 app.get("/user/:username",
@@ -146,25 +148,29 @@ app.get("/user/:username",
   },
   (req,res,next) => {
     const {name,email,username} = req.user;
-    res.status(200).send(JSON.stringify({name,email,username}));
+    res.status(200).send({name,email,username});
   }
 );
-app.put("/user/:username",
+app.put("/user/:username", // receives any of {name,email,username,password}
   authenticate,
   (req,res,next) => { // only allows a user to change their own user details
     if (req.user.username === req.params.username) return next();
     res.status(400).send({"message":"DISALLOWED"});
   },
-  (req,res,next) => {
-    userDB.updateUser(req.params.username,req.body,()=>{
-      req.logout(null,()=>{});
-      res.redirect("/");});
+  async (req,res,next) => {
+    if (req.body.password && !comparePasswords(req.body.password,req.user.password_hash)) {
+      // if sent a password that is different from the previous password, create a new hash and add it to the request body
+      req.body.password_hash = await passwordHash(req.body.password);
+    }
+    userDB.updateUser(req.params.username,req.body,(changeMessage)=>{
+      res.send({"message":changeMessage});});
   }
 );
-app.delete("/user/:username",
+app.delete("/user/:username", // receives {password}
   authenticate,
-  (req,res,next) => { // only allows a user to delete their own user account
-    if (req.user.username === req.params.username && req.user.password === req.body.password) return next();
+  async (req,res,next) => { // only allows a user to delete their own user account
+    const passwordCheck = await comparePasswords(req.body.password, req.user.password_hash);
+    if (passwordCheck && req.user.username === req.params.username) return next();
     res.status(400).send({"message":"DISALLOWED"});
   },
   (req,res,next) => {
@@ -240,49 +246,58 @@ app.delete("/admin/:id",
 
 
 app.get("/product/:id",
+  async (req,res,next) => {
+    const result = await shoppePool.query(`SELECT id,name,price,description,image FROM product WHERE id = ${req.params.id}`);
+    res.status(200).send(result.rows[0]);
+  }
+);
+app.get("/product",
   (req,res,next) => {
-    shoppePool.query(`SELECT * FROM product WHERE id = ${req.params.id}`, (error, result) => {
+    shoppePool.query('SELECT id,name,price,description,image FROM product LIMIT 10', (error, result) => {
       if (error) throw error;
       
       res.status(200).send(result.rows);
     });
   }
 );
-app.get("/product",
+
+app.get("/productImages/:filename",
   (req,res,next) => {
-    shoppePool.query('SELECT * FROM product', (error, result) => {
-      if (error) throw error;
-      
-      res.status(200).send(result.rows);
-    });
+    res.sendFile("/productImages/"+req.params.filename+".jpg", {root:__dirname});
   }
 );
 
 app.use("/cart",authenticate);
 app.get("/cart",
-  (req,res,next) => {
-    shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`, (error, result) => {
-      if (error) throw error;
+  async (req,res,next) => {
+    const cartData = await shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`);
+    
+    const cart = [];
+    for (let product of cartData.rows) {
+      const productData = await shoppePool.query(`SELECT id,name,price FROM product WHERE id = ${product.product_id}`);
+      cart.push({quantity:product.quantity, ...productData.rows[0]});
+    }
 
-      res.status(200).send(result.rows);
-    });
+    res.status(200).send(cart);
   }
 );
-app.post("/cart", // add item to cart
+app.post("/cart", // add item to cart, receives {productID,quantity}
   (req,res,next) => {
     if (!isNaN(req.body.productID) && !isNaN(req.body.quantity) && req.body.quantity > 0) {
-      shoppePool.query(`SELECT quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
+      shoppePool.query(`SELECT name,price,quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
         if (error) throw error;
 
+        const name = result.rows[0].name;
+        const price = result.rows[0].price;
         if (result.rows[0].quantity >= req.body.quantity) {
           shoppePool.query(`INSERT INTO cart VALUES (${req.user.id}, ${req.body.productID}, ${req.body.quantity})`, (error, result) => {
             if (error) throw error;
     
-            res.redirect("/cart");
+            res.status(200).send({quantity:req.body.quantity,id:req.body.productID,name,price});
           });
-        } else res.status(400).send("insufficient quantity in stock");
+        } else res.status(400).send({message:"insufficient quantity in stock"});
       });
-    } else res.status(400).send("invalid productID or quantity");
+    } else res.status(400).send({message:"invalid productID or quantity"});
   }
 );
 app.put("/cart", // modify item quantity
@@ -295,19 +310,19 @@ app.put("/cart", // modify item quantity
           shoppePool.query(`UPDATE cart SET quantity = ${req.body.quantity} WHERE customer_id = ${req.user.id} AND product_id = ${req.body.productID}`, (error, result) => {
             if (error) throw error;
 
-            res.redirect("/cart");
+            res.status(200).send({message:"ACCEPTED"});
           });
         } else res.status(400).send("insufficient quantity in stock");
       });
     } else res.status(400).send("invalid productID or quantity");
   }
 );
-app.delete("/cart", // remove item from cart
+app.delete("/cart", // remove item from cart, receives {productID}
   (req,res,next) => {
     shoppePool.query(`DELETE FROM cart WHERE customer_id = ${req.user.id} AND product_id = ${req.body.productID}`, (error, result) => {
       if (error) throw error;
 
-      res.redirect("/cart");
+      res.status(200).send({message:"ACCEPTED"});
     });
   }
 );
