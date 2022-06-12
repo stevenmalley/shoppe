@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { serverPath } from '../config';
 import ModifyCart from './ModifyCart';
 import './ProductDetails.css';
@@ -8,7 +7,7 @@ export default function ProductDetails(props) {
     
     return (
         <div className="productDetails">
-            <div className="productName">{props.product.name}</div>
+            <div className="productName">{props.product.name}<span>{props.product.author}</span></div>
             <div className="productPrice">{props.product.price}</div>
             <div className="productDesc">{props.product.description}</div>
             <img src={`${serverPath}/productImages/${props.product.image}`}  alt={props.product.name} />

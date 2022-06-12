@@ -15,6 +15,13 @@
     font-size: 1.4em;
 }
 
+.productDetails .productName span {
+    margin-top: 10px;
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+}
+
 .productDetails .productPrice {
     box-sizing: border-box;
     display: inline-block;

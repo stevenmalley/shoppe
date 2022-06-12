@@ -34,4 +34,10 @@ export const purchaseCart = () => {
 
 }
 
+export const clearCart = () => { // clears cart store when logging out
+    return (dispatch, getState) => {
+        dispatch({type: 'cart/clearCart'});
+    }
+}
+
 export function selectCart(state) {return state.cart};

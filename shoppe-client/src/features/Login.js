@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { login } from './store/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectAuth, login } from './store/auth';
 import { getCart } from './store/cart';
+import { getOrders } from './store/orders';
 
 function Login() {
 
@@ -10,9 +12,16 @@ function Login() {
 
   function handleLogin(username,password) {
     dispatch(login(username,password));
-    dispatch(getCart());
-    navigate("/");
   }
+
+  const auth = useSelector(selectAuth);
+  useEffect(()=>{ // after login has succeeded, load the user's cart and orders and navigate to the home page
+    if (auth.login) {
+      dispatch(getCart());
+      dispatch(getOrders());
+      navigate("/");
+    }
+  },[auth]);
 
   return (
     <form onSubmit={async(event)=>{

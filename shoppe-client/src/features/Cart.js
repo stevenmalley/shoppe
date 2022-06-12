@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectCart, getCart } from './store/cart.js';
+import { useSelector } from 'react-redux';
+import { selectCart } from './store/cart.js';
 import { Link } from 'react-router-dom';
 import ModifyCart from './ModifyCart';
 import './Cart.css';
@@ -8,7 +7,6 @@ import './Cart.css';
 const Cart = () => {
 
   const cart = useSelector(selectCart);
-  const dispatch = useDispatch();
 
   return (
     <div>

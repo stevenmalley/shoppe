@@ -181,12 +181,12 @@ app.delete("/user/:username", // receives {password}
 );
 
 
-// receive a product object: {name,description,quantity,price} and create a new product record UNLESS name, description and price match a pre-existing product.
+// receive a product object: {name,description,quantity,price,author} and create a new product record UNLESS name, description, price and author match a pre-existing product.
 app.post("/admin",
   authenticateAdmin,
   (req,res,next) => {
-    const {name,description,quantity,price} = req.body;
-    shoppePool.query(`SELECT * FROM product WHERE name = '${name}' AND description = '${description}' AND price = '${price}'`, (error, result) => {
+    const {name,description,quantity,price,author} = req.body;
+    shoppePool.query(`SELECT * FROM product WHERE name = '${name}' AND description = '${description}' AND price = '${price}' AND author = '${author}'`, (error, result) => {
       if (error) throw error;
       
       if (result.rows.length === 0) {
@@ -194,7 +194,7 @@ app.post("/admin",
           if (error) throw error;
 
           const newProductID = result.rows[0].case;
-          shoppePool.query(`INSERT INTO product VALUES (${newProductID}, '${name}', '${description}', ${quantity}, '${price}')`, (error,result) => {
+          shoppePool.query(`INSERT INTO product VALUES (${newProductID}, '${name}', '${description}', ${quantity}, '${price}', '${author}')`, (error,result) => {
             if (error) throw error;
 
             res.status(200).send("product added");
@@ -207,11 +207,11 @@ app.post("/admin",
   }
 );
 
-// if id matches a record in the db, amend any attributes (name, description, quantity, price)
+// if id matches a record in the db, amend any attributes (name, description, quantity, price, author)
 app.put("/admin/:id",
   authenticateAdmin,
   (req,res,next) => {
-    let {name,description,quantity,price} = req.body;
+    let {name,description,quantity,price,author} = req.body;
     shoppePool.query(`SELECT * FROM product WHERE id = ${req.params.id}`, (error, result) => {
       if (error) throw error;
 
@@ -222,10 +222,11 @@ app.put("/admin/:id",
         description = description || result.rows[0].description;
         quantity = quantity || result.rows[0].quantity;
         price = price || result.rows[0].price;
-        shoppePool.query(`UPDATE product SET name = '${name}', description = '${description}', quantity = ${quantity}, price = '${price}' WHERE id = ${req.params.id}`, (error, result) => {
+        author = author || result.rows[0].author;
+        shoppePool.query(`UPDATE product SET name = '${name}', description = '${description}', quantity = ${quantity}, price = '${price}', author = '${author}' WHERE id = ${req.params.id}`, (error, result) => {
           if (error) throw error;
 
-          res.status(200).send(`product amended`);
+          res.status(200).send({message:"product amended"});
         });
       }
     });
@@ -239,7 +240,7 @@ app.delete("/admin/:id",
     shoppePool.query(`DELETE FROM product WHERE id = ${id}`, (error, result) => {
       if (error) throw error;
 
-      res.status(300).send('product deleted');
+      res.status(300).send({message:"product deleted"});
     });
   }
 );
@@ -247,7 +248,7 @@ app.delete("/admin/:id",
 
 app.get("/product/:id",
   async (req,res,next) => {
-    const result = await shoppePool.query(`SELECT id,name,price,description,image FROM product WHERE id = ${req.params.id}`);
+    const result = await shoppePool.query(`SELECT id,name,author,price,description,image FROM product WHERE id = ${req.params.id}`);
     res.status(200).send(result.rows[0]);
   }
 );
@@ -277,7 +278,6 @@ app.get("/cart",
       const productData = await shoppePool.query(`SELECT id,name,price FROM product WHERE id = ${product.product_id}`);
       cart.push({quantity:product.quantity, ...productData.rows[0]});
     }
-
     res.status(200).send(cart);
   }
 );
@@ -400,12 +400,12 @@ app.get("/orders/:orderID",
       if (error) throw error;
 
       if (result.rows.length > 0) {
-        shoppePool.query(`SELECT * FROM sale WHERE purchase_id = ${req.params.orderID}`, (error, result) => {
+        shoppePool.query(`SELECT product_id,quantity FROM sale WHERE purchase_id = ${req.params.orderID}`, (error, result) => {
           if (error) throw error;
 
           res.status(200).send(result.rows);
         });
-      } else res.status(400).send("order not made by customer "+req.user.name);
+      } else res.status(400).send({message:"order not made by customer "+req.user.name});
     });
   }
 );

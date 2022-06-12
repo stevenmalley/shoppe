@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { logout } from "./store/auth";
+import { clearCart } from "./store/cart";
 import { useEffect } from 'react';
+import { logout } from './store/auth';
 
 function Logout() {
 
@@ -9,7 +10,8 @@ function Logout() {
   const dispatch = useDispatch();
 
   useEffect(()=>{
-    dispatch(logout());
+    dispatch(logout())
+    dispatch(clearCart());
     navigate("/");
   },[]);
 
