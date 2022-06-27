@@ -35,7 +35,7 @@ function Login() {
         <br />
         <input type="submit" value="SUBMIT" />
       </form>
-      <Link to="/auth/google/login">Log in with Google</Link>
+      <a href="/auth/google/login">Log in with Google</a>
     </div>
   );
 }

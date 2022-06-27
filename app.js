@@ -96,15 +96,14 @@ passport.use(new LocalStrategy(
 
 let GoogleStrategy = require('passport-google-oauth20').Strategy;
 passport.use(new GoogleStrategy({
-    clientID: "736022707807-rnm7nh3u5q6g8pjkvqs5etnfn77cio4r.apps.googleusercontent.com",
-    clientSecret: "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",
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "https://bbc.co.uk"
   },
   function(accessToken, refreshToken, profile, cb) {
 
 
     console.log(profile);
-
 
 
     userDB.googleLogin(profile.id, function (err, user) {
@@ -114,7 +113,7 @@ passport.use(new GoogleStrategy({
 ));
 
 app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile'] }));
+  passport.authenticate('google', { scope: ['profile'], failureRedirect: '/user' }));
 
 app.get('/auth/google/login',
   passport.authenticate('google', { assignProperty: 'federatedUser', failureRedirect: '/user' }),

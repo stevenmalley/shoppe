@@ -24,6 +24,8 @@ export default function AppRoutes() {
             <Route path="/product/:productId" element={<ProductPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+        {/*    <Route path="/auth/google" element={<GoogleLogin />} />  */}
+            <Route path="/auth/google/login" element={<GoogleLogin />} />
 
             {/* private routes */}
             <Route path="/cart"             element={login ? <Cart />   : <Navigate replace to="/login" />} />
