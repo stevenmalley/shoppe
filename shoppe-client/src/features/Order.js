@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { selectOrders, getOrder } from './store/orders.js';
-import { selectProducts, getAllProducts } from './store/product.js';
+import { selectProducts, getOneProduct } from './store/product.js';
 import { Link, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -19,19 +19,22 @@ const Order = () => {
   },[]);
 
   useEffect(()=>{
-    if (order.sales && order.sales.some(sale => !product.find(p => p.id == sale.product_id))) {
-      dispatch(getAllProducts());
+    if (order.sales) {
+      for (const sale of order.sales) {
+        if (!product.some(p => p.id == sale.product_id)) dispatch(getOneProduct(sale.product_id));
+      }
     }
   },[orders]);
 
   return (
     <div>
       <div>Order ID: {orderID}</div>
-      <div>Date: {order.date}</div>
-      {order.sales && product.length > 0 ? order.sales.map((sale,i) => {
-        const saleProduct = product.find(p => p.id == sale.product_id);
-        return <div>{saleProduct.name} ({sale.quantity})</div>;
-      }) : ""}
+      <div>Date: {order.datetime}</div>
+      {order.sales ?
+        order.sales.map((sale,i) => {
+          const saleProduct = product.find(p => p.id == sale.product_id);
+          if (saleProduct) return <Link key={`sale${i}`} to={`/product/${sale.product_id}`} style={{display:"block",marginTop:10}}>{saleProduct.name} ({sale.quantity})</Link>;
+        }) : ""}
     </div>
   );
 }

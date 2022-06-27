@@ -73,20 +73,57 @@ app.use((req,res,next) => {
 });
 
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
 app.use(passport.initialize());
 app.use(passport.session());
+
+const LocalStrategy = require("passport-local").Strategy;
 passport.use(new LocalStrategy(
   function(username, password, done) {
     userDB.findByUsername(username, async (err, user) => { // Look up user in the db
       if(err) return done(err); // If there's an error in db lookup, return err callback function
       if(!user) return done(null, false); // If user not found, return null and false in callback
+      if (user.google_account) return done(null, false); // If user is a google account, it will not have a local password; do not allow login locally
       const passwordCheck = await comparePasswords(password, user.password_hash);
       if(!passwordCheck) return done(null, false); // If user found, but password not valid, return err and false in callback
       return done(null, user); // If user found and password valid, return the user object in callback
     });
   })
 );
+
+
+
+/* GOOGLE OAUTH */
+
+let GoogleStrategy = require('passport-google-oauth20').Strategy;
+passport.use(new GoogleStrategy({
+    clientID: "736022707807-rnm7nh3u5q6g8pjkvqs5etnfn77cio4r.apps.googleusercontent.com",
+    clientSecret: "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",
+    callbackURL: "https://bbc.co.uk"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+
+
+    console.log(profile);
+
+
+
+    userDB.googleLogin(profile.id, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile'] }));
+
+app.get('/auth/google/login',
+  passport.authenticate('google', { assignProperty: 'federatedUser', failureRedirect: '/user' }),
+  (req,res) => {res.redirect("/user");});
+
+/********************/
+
+
+
 passport.serializeUser((user,done) => {
   done(null,user.id); // sets the id as the user's browser cookie and stores it in req.session.passport.user.id
 });
@@ -96,7 +133,6 @@ passport.deserializeUser((id, done) => {
     done(null, user);
   });
 });
-
 
 function authenticate(req,res,next) {
   if (req.isAuthenticated()) return next();
@@ -254,7 +290,7 @@ app.get("/product/:id",
 );
 app.get("/product",
   (req,res,next) => {
-    shoppePool.query('SELECT id,name,price,description,image FROM product LIMIT 10', (error, result) => {
+    shoppePool.query('SELECT id,name,price,description,image FROM product', (error, result) => {
       if (error) throw error;
       
       res.status(200).send(result.rows);
@@ -387,7 +423,7 @@ app.get("/cart/checkout", // buy contents of cart
 app.use("/orders",authenticate);
 app.get("/orders",
   (req,res,next) => {
-    shoppePool.query(`SELECT id,date FROM purchase WHERE customer_id = ${req.user.id}`, (error, result) => {
+    shoppePool.query(`SELECT id,datetime FROM purchase WHERE customer_id = ${req.user.id}`, (error, result) => {
       if (error) throw error;
 
       res.status(200).send(result.rows);

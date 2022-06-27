@@ -3,6 +3,18 @@ body {
   font-family: Verdana, sans-serif;
 }
 
+.App {
+  text-align: center;
+}
+
+.shoppeHeader h1 {
+  color: brown;
+}
+
+.shoppeHeader h2 {
+  color: chocolate;
+}
+
 .authDetails {
   padding: 10px;
 }
@@ -29,9 +41,9 @@ header {
 }
 
 .navigation-active {
-  background-color: #00d;
+  background-color: brown;
 }
 
 .navigation-active:hover {
-  background-color: #04f;
+  background-color: chocolate;
 }

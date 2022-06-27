@@ -5,7 +5,9 @@ module.exports.initialisePool = function(aPool) {
 }
 
 
-// userDB.createUser({ username, password });
+/* userDB.createUser({ name, email, username, password_hash }, (status,msg) => {
+    req.logout(null,()=>{});
+    res.status(status).send(msg);}); */
 module.exports.createUser = function(userData, cb) {
     const {name, email, username, password_hash} = userData;
     if (name && email && username && password_hash) {
@@ -13,7 +15,7 @@ module.exports.createUser = function(userData, cb) {
             if (error) throw error;
 
             if (result.rows.length === 0) {
-                pool.query(`INSERT INTO customer (name,email,username,password_hash) VALUES ('${name}', '${email}', '${username}', '${password_hash}')`, (error,result) => {
+                pool.query(`INSERT INTO customer (name,email,username,password_hash,google_account) VALUES ('${name}', '${email}', '${username}', '${password_hash}', FALSE)`, (error,result) => {
                     if (error) throw error;
 
                     cb(201,"User created");
@@ -56,7 +58,6 @@ module.exports.findById = function(id, cb) {
 }
 
 module.exports.updateUser = async function(username, newUserData, cb) {
-
     let usernameTaken = false;
     
     if (newUserData.username && newUserData.username !== username) { // check that a new username is not already in use
@@ -101,4 +102,41 @@ module.exports.deleteUser = function(username, cb) {
 
         cb();
     });
+}
+
+
+/** googleLogin(profile.id, function (err, user) {
+      return cb(err, user);) */
+module.exports.googleLogin = function(profileID,cb) {
+    pool.query(`SELECT * FROM google_credentials WHERE subject = '${federatedUser.id}'`,
+        (error, result) => {
+            if (error) cb(error);
+
+            if (result.rows.length === 0) {
+                pool.query(`INSERT INTO customers (name,username,google_account) VALUES ('${federatedUser.displayName}','${federatedUser.id}',TRUE)`,
+                (error) => {
+                    if (error, insertCustomerResult) cb(error);
+
+                    console.log(insertCustomerResult);
+                    
+                    pool.query(`INSERT INTO google_credentials (subject, name) VALUES ('${federatedUser.id}','${federatedUser.displayName}')`,
+                        (error) => {
+                            if (error) cb(error);
+                            
+                            cb(null,insertCustomerResult.rows[0]);
+                        }
+                    );
+                });
+            } else {
+                const row = result.rows[0];
+                pool.query(`SELECT id, username, name FROM customers WHERE id = '${row.customer_id}'`,
+                    (error, selectCustomerResult) => {
+                        if (error) cb(error);
+                        
+                        cb(null,selectCustomerResult.rows[0]);
+                    }
+                );
+            }
+        }
+    );
 }

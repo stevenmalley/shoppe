@@ -10,14 +10,16 @@ const Cart = () => {
 
   return (
     <div>
-      {cart.map((product,i) =>
-        <div key={`cartProduct${i}`} className="cart-item">
-          <Link to={`/product/${product.id}`} className="cart-item-link">
-            <div>{product.name}</div>
-            <div>{product.price}</div>
-          </Link>
-          <ModifyCart productID={product.id} />
-        </div>
+      {cart.length === 0 ?
+        "cart empty" :
+        cart.map((product,i) =>
+          <div key={`cartProduct${i}`} className="cart-item">
+            <Link to={`/product/${product.id}`} className="cart-item-link">
+              <div>{product.name}</div>
+              <div>{product.price}</div>
+            </Link>
+            <ModifyCart productID={product.id} />
+          </div>
       )}
     </div>
   );

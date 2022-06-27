@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAuth, login } from './store/auth';
 import { getCart } from './store/cart';
@@ -24,16 +24,19 @@ function Login() {
   },[auth]);
 
   return (
-    <form onSubmit={async(event)=>{
-      event.preventDefault();
-      handleLogin(event.target.username.value,event.target.password.value);
-    }}>
-      <label htmlFor="username">USERNAME: </label><input type="text" name="username" id="username" />
-      <br />
-      <label htmlFor="password">PASSWORD: </label><input type="text" name="password" id="password" />
-      <br />
-      <input type="submit" value="SUBMIT" />
-    </form>
+    <div>
+      <form onSubmit={async(event)=>{
+        event.preventDefault();
+        handleLogin(event.target.username.value,event.target.password.value);
+      }}>
+        <label htmlFor="username">USERNAME: </label><input type="text" name="username" id="username" />
+        <br />
+        <label htmlFor="password">PASSWORD: </label><input type="text" name="password" id="password" />
+        <br />
+        <input type="submit" value="SUBMIT" />
+      </form>
+      <Link to="/auth/google/login">Log in with Google</Link>
+    </div>
   );
 }
 

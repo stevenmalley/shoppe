@@ -11,7 +11,6 @@ import { homeSlice } from './features/store/homeSlice';
 import { productSlice } from './features/store/productSlice';
 import { cartSlice } from './features/store/cartSlice';
 import { ordersSlice } from './features/store/ordersSlice';
-import './App.css';
 
 
 const store = configureStore({

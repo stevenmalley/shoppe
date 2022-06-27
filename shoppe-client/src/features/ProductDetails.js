@@ -2,7 +2,6 @@ import { serverPath } from '../config';
 import ModifyCart from './ModifyCart';
 import './ProductDetails.css';
 
-
 export default function ProductDetails(props) {
     
     return (

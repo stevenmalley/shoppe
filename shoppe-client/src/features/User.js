@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { getUserAccount, checkLogin, selectAuth } from './store/auth.js';
 
 const User = () => {
@@ -7,19 +8,17 @@ const User = () => {
   const auth = useSelector(selectAuth);
   const dispatch = useDispatch();
 
+  const userID = useParams().userID;
+
   useEffect(() => {
-    async function getAccountDetails() {
-      await dispatch(checkLogin());
-      if (auth.login) {
-        dispatch(getUserAccount(auth.username));
-      }
+    dispatch(checkLogin());
+    if (auth.login) {
+      dispatch(getUserAccount(auth.username));
     }
-    getAccountDetails();
-  },[]);
+  },[auth.login]);
   
 
-  if (auth.login) {
-    
+  if (auth.login && auth.username === userID) {
     return (
       <div>
         username: {auth.username}<br />

@@ -6,16 +6,17 @@ import ProductDetails from './ProductDetails';
 
 export default function ProductPage() {
 
-    const product = useSelector(selectProducts);
+    const products = useSelector(selectProducts);
     const dispatch = useDispatch();
 
     const productID = useParams().productId;
+    const product = products.find(p => p.id == productID);
 
     useEffect(()=>{
         dispatch(getOneProduct(productID));
     },[]);
 
-    if (product.length > 0 && product[0].id == productID) {
-        return <ProductDetails product={product[0]} />;
+    if (product) {
+        return <ProductDetails product={product} />;
     } else return <div>product {productID}</div>;
 }

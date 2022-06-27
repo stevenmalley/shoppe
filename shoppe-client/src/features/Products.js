@@ -5,12 +5,12 @@ import ProductTile from './ProductTile';
 
 export default function Products() {
 
-    const product = useSelector(selectProducts);
+    const products = useSelector(selectProducts);
     const dispatch = useDispatch();
 
     useEffect(()=>{dispatch(getAllProducts())},[]);
 
-    if (product.length > 0) {
-        return <div>{product.map(prod => <ProductTile key={"productID"+prod.id} product={prod} />)}</div>;
+    if (products.length > 0) {
+        return <div>{products.map(prod => <ProductTile key={"productID"+prod.id} product={prod} />)}</div>;
     } else return <div>products</div>;
 }
