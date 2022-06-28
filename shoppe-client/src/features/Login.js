@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAuth, login } from './store/auth';
 import { getCart } from './store/cart';
@@ -35,7 +35,6 @@ function Login() {
         <br />
         <input type="submit" value="SUBMIT" />
       </form>
-      <Link to="/auth/google/login">Log in with Google</Link>
     </div>
   );
 }

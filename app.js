@@ -91,38 +91,6 @@ passport.use(new LocalStrategy(
 );
 
 
-
-/* GOOGLE OAUTH */
-
-let GoogleStrategy = require('passport-google-oauth20').Strategy;
-passport.use(new GoogleStrategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://bbc.co.uk"
-  },
-  function(accessToken, refreshToken, profile, cb) {
-
-
-    console.log(profile);
-
-
-    userDB.googleLogin(profile.id, function (err, user) {
-      return cb(err, user);
-    });
-  }
-));
-
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile'], failureRedirect: '/user' }));
-
-app.get('/auth/google/login',
-  passport.authenticate('google', { assignProperty: 'federatedUser', failureRedirect: '/user' }),
-  (req,res) => {res.redirect("/user");});
-
-/********************/
-
-
-
 passport.serializeUser((user,done) => {
   done(null,user.id); // sets the id as the user's browser cookie and stores it in req.session.passport.user.id
 });
