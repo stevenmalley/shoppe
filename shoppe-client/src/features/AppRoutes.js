@@ -5,6 +5,7 @@ import Products from './Products';
 import ProductPage from './ProductPage';
 import Register from './Register';
 import Login from './Login';
+import GoogleLogin from './GoogleLogin';
 import Logout from './Logout';
 import Cart from './Cart';
 import Orders from './Orders';
@@ -19,13 +20,13 @@ export default function AppRoutes() {
     return (
         <Routes>
             {/* public routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/product/" element={<Products />} />
-            <Route path="/product/:productId" element={<ProductPage />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-        {/*    <Route path="/auth/google" element={<GoogleLogin />} />  */}
-            <Route path="/auth/google/login" element={<GoogleLogin />} />
+            <Route path="/"                     element={<Home />} />
+            <Route path="/product/"             element={<Products />} />
+            <Route path="/product/:productId"   element={<ProductPage />} />
+            <Route path="/register"             element={<Register />} />
+            <Route path="/login"                element={<Login />} />
+        {/* <Route path="/auth/google"          element={<GoogleLogin />} />  */}
+            <Route path="/auth/google/login"    element={<GoogleLogin />} />
 
             {/* private routes */}
             <Route path="/cart"             element={login ? <Cart />   : <Navigate replace to="/login" />} />
