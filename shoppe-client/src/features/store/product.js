@@ -1,8 +1,6 @@
-import { serverPath } from "../../config";
-
 export const getAllProducts = () => {
     return async (dispatch, getState) => {
-        const response = await fetch(`${serverPath}/product`);
+        const response = await fetch(`/product`);
         const jsonResponse = await response.json();
         dispatch({type: 'product/allProducts', payload: jsonResponse});
     }
@@ -10,7 +8,7 @@ export const getAllProducts = () => {
 
 export const getOneProduct = (id) => {
     return async (dispatch, getState) => {
-        const response = await fetch(`${serverPath}/product/${id}`,{credentials:"include"}); // send cookie for authentication to check if product is in cart
+        const response = await fetch(`/product/${id}`,{credentials:"include"}); // send cookie for authentication to check if product is in cart
         const jsonResponse = await response.json();
         dispatch({type: 'product/oneProduct', payload: jsonResponse});
     }

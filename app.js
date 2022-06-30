@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config(); // sets process.env with constants from .env
 
 const cors = require("cors");
-const whitelist = [undefined,'http://localhost:3000'];
+const whitelist = [undefined,'http://localhost:3000','http://localhost:8080'];
 const corsOptions = {
   credentials: true, // This is important.
   origin: (origin, callback) => {
@@ -112,7 +112,9 @@ function authenticateAdmin(req,res,next) {
 
 
 
-app.get("/",
+app.use(express.static("shoppe-client/build"));
+
+app.get("/home",
   (req,res,next) => {
     res.status(200).send({"message":"Welcome to Shoppe"});
   }
