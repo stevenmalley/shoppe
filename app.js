@@ -54,7 +54,7 @@ const session = require("express-session");
 app.use(
   session({
     secret: process.env.EXPRESS_SECRET,
-    cookie: {maxAge: 1000*60*5, httpOnly: false, secure: false}, // 5 minutes
+    cookie: {maxAge: 1000*60*5, httpOnly: false, secure: true}, // 5 minutes
     resave: false, // if true, would force a session to be saved even when no data is modified
     saveUninitialized: false // if true, stores every new session
   })
