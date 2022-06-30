@@ -9,7 +9,6 @@ const whitelist = [undefined,'http://localhost:3000','http://localhost:8080','ht
 const corsOptions = {
   credentials: true, // This is important.
   origin: (origin, callback) => {
-    console.log(origin);
     if(whitelist.includes(origin))
       return callback(null, true)
 
@@ -20,18 +19,15 @@ app.use(cors(corsOptions));
 //app.use(cors());
 
 const Pool = require('pg').Pool;
-const shoppePool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+const poolOptions = {connectionString: process.env.DATABASE_URL};
+if (process.env.DEVELOPMENT !== "true") poolOptions.ssl = {rejectUnauthorized: false};
+const shoppePool = new Pool(poolOptions);
 /*  user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: process.env.DATABASE_PORT
-  */
-});
+});*/
 
 const bcrypt = require("bcrypt");
 const passwordHash = async (password) => { // on user registration or password change
