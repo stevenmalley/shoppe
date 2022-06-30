@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config(); // sets process.env with constants from .env
 
 const cors = require("cors");
-const whitelist = [undefined,'http://localhost:3000','http://localhost:8080'];
+const whitelist = [undefined,'http://localhost:3000','http://localhost:8080','https://ye-shoppe.herokuapp.com'];
 const corsOptions = {
   credentials: true, // This is important.
   origin: (origin, callback) => {
