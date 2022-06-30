@@ -20,7 +20,10 @@ app.use(cors(corsOptions));
 
 const Pool = require('pg').Pool;
 const shoppePool = new Pool({
-  connectionString: process.env.DATABASE_URL + "?sslmode=require"
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 /*  user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
