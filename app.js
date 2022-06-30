@@ -20,11 +20,13 @@ app.use(cors(corsOptions));
 
 const Pool = require('pg').Pool;
 const shoppePool = new Pool({
-  user: process.env.USER,
+  connectionString: process.env.DATABASE_URL
+/*  user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: process.env.DATABASE_PORT
+  */
 });
 
 const bcrypt = require("bcrypt");
@@ -61,7 +63,7 @@ app.use(
 const userDB = require("./userDB.js");
 userDB.initialisePool(shoppePool);
 
-const PORT = process.env.SERVER_PORT;
+const PORT = process.env.PORT || 8080;
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
@@ -415,4 +417,4 @@ app.get("/orders/:orderID",
   }
 );
 
-app.listen(PORT, () => console.log("Shoppe running on http://localhost:"+PORT));
+app.listen(PORT, () => console.log("Shoppe running on port: "+PORT));
