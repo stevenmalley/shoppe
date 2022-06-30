@@ -9,7 +9,6 @@ const whitelist = [undefined,'http://localhost:3000','http://localhost:8080'];
 const corsOptions = {
   credentials: true, // This is important.
   origin: (origin, callback) => {
-    console.log(origin);
     if(whitelist.includes(origin))
       return callback(null, true)
 
@@ -21,7 +20,7 @@ app.use(cors(corsOptions));
 
 const Pool = require('pg').Pool;
 const shoppePool = new Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL + "?sslmode=require"
 /*  user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
@@ -55,7 +54,7 @@ const session = require("express-session");
 app.use(
   session({
     secret: process.env.EXPRESS_SECRET,
-    cookie: {maxAge: 1000*60*5, httpOnly: false, secure: true}, // 5 minutes
+    cookie: {maxAge: 1000*60*5, httpOnly: false, secure: false}, // 5 minutes
     resave: false, // if true, would force a session to be saved even when no data is modified
     saveUninitialized: false // if true, stores every new session
   })
