@@ -12,7 +12,6 @@ import { productSlice } from './features/store/productSlice';
 import { cartSlice } from './features/store/cartSlice';
 import { ordersSlice } from './features/store/ordersSlice';
 
-
 const store = configureStore({
   reducer: combineReducers({
     auth:authSlice.reducer,
@@ -23,14 +22,15 @@ const store = configureStore({
 });
 
 function App() {
+
   return (
     <div className="App">
       <Router>
-      <Provider store={store}>
-        <AuthDetails />
-        <Header />
-        <AppRoutes />
-      </Provider>
+        <Provider store={store}>
+          <AuthDetails />
+          <Header />
+          <AppRoutes />
+        </Provider>
       </Router>
     </div>
   );

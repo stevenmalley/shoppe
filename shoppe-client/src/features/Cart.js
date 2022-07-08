@@ -1,17 +1,13 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { selectCart, purchaseCart } from './store/cart.js';
+import { useSelector } from 'react-redux';
+import { selectCart } from './store/cart.js';
 import { Link } from 'react-router-dom';
 import ModifyCart from './ModifyCart';
+import Stripe from './Stripe';
 import './Cart.css';
 
 const Cart = () => {
 
   const cart = useSelector(selectCart);
-  const dispatch = useDispatch();
-
-  function purchaseHandler() {
-    dispatch(purchaseCart());
-  }
 
   return (
     cart.length === 0 ?
@@ -25,7 +21,7 @@ const Cart = () => {
               </Link>
               <ModifyCart productID={product.id} />
             </div>)}
-          <button onClick={purchaseHandler}>BUY</button>
+          <Stripe />
         </div>
   );
 }

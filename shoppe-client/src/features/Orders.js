@@ -1,10 +1,16 @@
-import { useSelector } from 'react-redux';
-import { selectOrders } from './store/orders.js';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectOrders, getOrders } from './store/orders.js';
 import { Link } from 'react-router-dom';
 
 const Orders = () => {
 
   const orders = useSelector(selectOrders);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getOrders());
+  },[])
 
   return (
     <div>

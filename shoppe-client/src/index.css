@@ -23,6 +23,30 @@ header {
   margin: 10px 0;
 }
 
+#headerTitle {
+  width: 800px;
+  height: 150px;
+  position: relative;
+  margin: 0 auto;
+}
+
+#headings {
+  width: 400px;
+  position: absolute;
+  left: 200px;
+  padding-bottom: 20px;
+}
+
+#headerImage {
+  position: absolute;
+  left: 20px;
+}
+
+#headerImage img {
+  width: 140px;
+  height: 140px;
+}
+
 .navigation {
   padding: 10px;
   margin: 0 10px;
@@ -46,4 +70,25 @@ header {
 
 .navigation-active:hover {
   background-color: chocolate;
+}
+
+
+@media all and (max-width: 800px) {
+  #headerTitle {
+    width: 100%;
+    height: auto;
+  }
+  #headerImage {
+    position: static;
+    display: block;
+    padding: 0;
+  }
+  #headings {
+    position: static;
+    width: 100%;
+    display: block;
+  }
+  #headings h1 {
+    margin-top: 0;
+  }
 }

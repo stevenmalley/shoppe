@@ -17,6 +17,12 @@ const ModifyCart = (props) => {
   }
   const cartQuantity = getCartQuantity();
 
+  function getProductInsufficient() {
+    // if there is insufficient quantity in stock, the product will have .insufficient = true
+    let cartProduct = cart.find(product => product.id == props.productID);
+    if (cartProduct) return cartProduct.insufficient;
+  }
+
   function addToCartHandler() {
     dispatch(addToCart(props.productID,1));
   }
@@ -37,6 +43,7 @@ const ModifyCart = (props) => {
           <button onClick={addToCartHandler}>add to cart</button> :
           <button onClick={removeFromCartHandler}>remove from cart</button>
         }
+        {getProductInsufficient() ? "insufficient quantity in stock" : ""}
       </div>
     );
   } else return <div></div>;

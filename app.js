@@ -489,4 +489,40 @@ app.get("/orders/:orderID",
   }
 );
 
+
+
+// STRIPE
+
+const stripe = require("stripe")('sk_test_51LJDsuEAyHGdNsJokOIv5h29yt3lyaCYw8J3yuVmuzgHYAY3piKtshLHrmfIf9VNOryOsSUgyiP0KPWZa0dGrEs700VocBGswD');
+
+const calculateOrderAmount = (items) => {
+  const amount = items.reduce((a,b) => a + (b.quantity * 100 * b.price.slice(1)), 0);
+  console.log(amount);
+  return amount;
+};
+
+app.post("/create-payment-intent", async (req, res) => {
+  const items = req.body.cart;
+
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: calculateOrderAmount(items),
+    currency: "gbp",
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+});
+/*******************************************************************/
+
+
+
+
+
+
+
 app.listen(PORT, () => console.log("Shoppe running on port: "+PORT));

@@ -24,3 +24,20 @@
 .cart-item-modify button {
   margin: 0 10px;
 }
+
+#shoppeStripe {
+  max-width: 600px;
+  margin: 30px auto 10px;
+}
+
+#buyButton {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+  font-size: 25px;
+  padding: 5px 10px;
+}
+
+#buyButton:hover {
+  background-color: darkorange;
+}
