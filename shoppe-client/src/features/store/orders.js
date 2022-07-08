@@ -1,6 +1,8 @@
+import serverPath from '../../serverPath';
+
 export const getOrder = (orderID) => {
     return async (dispatch, getState) => {
-        const response = await fetch(`/orders/${orderID}`, {credentials:"include"});
+        const response = await fetch(serverPath+`/orders/${orderID}`, {credentials:"include"});
         const jsonResponse = await response.json();
         if (jsonResponse.message !== "NOT AUTHENTICATED") dispatch({type: 'orders/getOrder', payload: {orderID,sales:jsonResponse}});
     }
@@ -8,7 +10,7 @@ export const getOrder = (orderID) => {
 
 export const getOrders = () => {
     return async (dispatch, getState) => {
-        const response = await fetch(`/orders`, {credentials:"include"});
+        const response = await fetch(serverPath+`/orders`, {credentials:"include"});
         const jsonResponse = await response.json();
         if (jsonResponse.message !== "NOT AUTHENTICATED") dispatch({type: 'orders/getOrders', payload: jsonResponse});
     }

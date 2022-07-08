@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import './ProductTile.css';
+import serverPath from '../serverPath';
 
 
 export default function ProductTile(props) {
@@ -9,7 +10,7 @@ export default function ProductTile(props) {
             <div className="productName">{props.product.name}</div>
             <div className="productDesc">{props.product.description}</div>
             <div className="productPrice">{props.product.price}</div>
-            <img src={`/productImages/${props.product.image}`}  alt={props.product.name} />
+            <img src={serverPath+`/productImages/${props.product.image}`}  alt={props.product.name} />
         </Link>
     );
 }

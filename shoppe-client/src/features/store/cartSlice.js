@@ -12,7 +12,7 @@ const cartOptions = {
     },
     modifyCart:(cart,action) => {},
     removeFromCart:(cart,action) => cart.filter(product => product.id != action.payload.productID),
-    purchaseCart:(cart,action) => {},
+    purchaseCart:(cart,action) => cart.filter(product => !action.payload.products.some(p => p.product_id === product.id)),
     clearCart:(cart,action) => []
   }
 }

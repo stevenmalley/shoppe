@@ -22,7 +22,8 @@ const Pool = require('pg').Pool;
 const poolOptions = {connectionString: process.env.DATABASE_URL};
 if (process.env.DEVELOPMENT !== "true") poolOptions.ssl = {rejectUnauthorized: false};
 const shoppePool = new Pool(poolOptions);
-/*  user: process.env.USER,
+/*const shoppePool = new Pool({
+  user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
@@ -131,7 +132,7 @@ app.post("/register", async (req, res) => {
 });
 
 app.get("/login", // OBSOLETE ??
-  (req,res,next) => {res.send("login here");});
+  (req,res,next) => {res.send({message:"login here"});});
 app.post("/login", // receives {username,password}
   (req,res,next) => {req.logout(null,()=>{});next()}, // close a previous session
   passport.authenticate("local", {failureRedirect: "/user"}), // sets req.user
@@ -278,11 +279,23 @@ app.get("/productImages/:filename",
 app.use("/cart",authenticate);
 app.get("/cart",
   async (req,res,next) => {
-    const cartData = await shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`);
+    //const cartData = await shoppePool.query(`SELECT * FROM carp WHERE customer_id = ${req.user.id}`);
     
+    let cartData;
+    try {
+      cartData = await shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`);
+    } catch (error) {
+      return res.status(400).send({message:"customer not found"});
+    }
+
     const cart = [];
     for (let product of cartData.rows) {
-      const productData = await shoppePool.query(`SELECT id,name,price FROM product WHERE id = ${product.product_id}`);
+      let productData;
+      try {
+        productData = await shoppePool.query(`SELECT id,name,price FROM product WHERE id = ${product.product_id}`);
+      } catch (error) {
+        return res.status(400).send({message:`product ${product.product_id} not found`});
+      }
       cart.push({quantity:product.quantity, ...productData.rows[0]});
     }
     res.status(200).send(cart);
@@ -307,7 +320,7 @@ app.post("/cart", // add item to cart, receives {productID,quantity}
     } else res.status(400).send({message:"invalid productID or quantity"});
   }
 );
-app.put("/cart", // modify item quantity
+app.put("/cart", // modify item quantity, receives {productID,quantity}
   (req,res,next) => {
     if (!isNaN(req.body.productID) && !isNaN(req.body.quantity) && req.body.quantity > 0) {
       shoppePool.query(`SELECT quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
@@ -319,9 +332,9 @@ app.put("/cart", // modify item quantity
 
             res.status(200).send({message:"ACCEPTED"});
           });
-        } else res.status(400).send("insufficient quantity in stock");
+        } else res.status(400).send({message:"insufficient quantity in stock"});
       });
-    } else res.status(400).send("invalid productID or quantity");
+    } else res.status(400).send({message:"invalid productID or quantity"});
   }
 );
 app.delete("/cart", // remove item from cart, receives {productID}
@@ -335,13 +348,68 @@ app.delete("/cart", // remove item from cart, receives {productID}
 );
 app.get("/cart/checkout", // buy contents of cart
   authenticate,
+  async (req,res,next) => {
+    const customerID = req.user.id;
+
+    let salesResult;
+    salesResult = await shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${customerID}`);
+
+    const sales = salesResult.rows;
+    let salesRemaining = sales.length; // used to track the processing of purchases
+
+    // get new purchase ID
+    let purchaseIDresult;
+    purchaseIDresult = await shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase");
+
+    const newPurchaseID = purchaseIDresult.rows[0].case;
+    const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // create purchase
+    await shoppePool.query(`INSERT INTO purchase VALUES (${newPurchaseID},${customerID},'${dateString}')`);
+
+    for (const sale of sales) {
+
+      // check sufficient stock quantity
+      let quantityResult;
+      quantityResult = await shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`);
+      
+      if (quantityResult.quantity < sale.quantity) salesRemaining--;
+      else {
+
+        // delete cart record
+        await shoppePool.query(`DELETE FROM cart WHERE customer_id = ${customerID} AND product_id = ${sale.product_id}`);
+
+        // reduce stock quantity
+        await shoppePool.query(`UPDATE product SET quantity = quantity-${sale.quantity} WHERE id = ${sale.product_id}`);
+
+        // add sale record
+        const newSaleIDquery = "SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM sale";
+        await shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`);
+
+        salesRemaining--;
+        sale.sold = true;
+        if (salesRemaining === 0) {
+          const sold = sales.filter(s => s.sold).map(s => ({product_id:s.product_id,quantity:s.quantity}));
+          const salesStatus = sold.length === sales.length ? "complete" : "partial";
+          res.status(201).send({message:"transaction successful",salesStatus,products:sold});
+        }
+      }
+    }
+  }
+);
+
+/*
+
+app.get("/cart/checkout", // buy contents of cart
+  authenticate,
   (req,res,next) => {
-    shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${req.user.id}`, (error, result) => {
+    const customerID = req.user.id;
+
+    shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${customerID}`, (error, result) => {
       if (error) throw error;
 
-      const customerID = result.rows[0].customer_id;
       const sales = result.rows;
-      const completion = [];
+      let salesRemaining = sales.length; // used to track the processing of purchases
 
       // get new purchase ID
       shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase", (error,result) => {
@@ -351,7 +419,7 @@ app.get("/cart/checkout", // buy contents of cart
         const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         // create purchase object
-        shoppePool.query(`INSERT INTO purchase VALUES ((${newPurchaseID}),${customerID},'${dateString}')`, (error,result) => {
+        shoppePool.query(`INSERT INTO purchase VALUES (${newPurchaseID},${customerID},'${dateString}')`, (error,result) => {
           if (error) throw error;
 
           for (const sale of sales) {
@@ -374,15 +442,17 @@ app.get("/cart/checkout", // buy contents of cart
                     shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`, (error,result) => {
                       if (error) throw error;
 
-                      completion.push(true);
-                      if (completion.length === sales.length) {
-                        if (completion.every(c => c)) res.status(201).send("purchase accepted");
-                        else res.status(201).send("some purchases failed");
+                      salesRemaining--;
+                      sale.sold = true;
+                      if (salesRemaining === 0) {
+                        const sold = sales.filter(s => s.sold).map(s => ({product_id:s.product_id,quantity:s.quantity}));
+                        const salesStatus = sold.length === sales.length ? "complete" : "partial";
+                        res.status(201).send({message:"transaction successful",salesStatus,products:sold});
                       }
                     });
                   });
                 });
-              } else completion.push(false);
+              } else salesRemaining--;
             });
           }
         });
@@ -390,6 +460,8 @@ app.get("/cart/checkout", // buy contents of cart
     });
   }
 );
+
+*/
 
 app.use("/orders",authenticate);
 app.get("/orders",

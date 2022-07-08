@@ -1,8 +1,10 @@
+import serverPath from '../../serverPath';
+
 export const register = (user) => {
   return async (dispatch, getState) => {
     if (user.name && user.email && user.username && user.password) {
       const {name,email,username,password} = user;
-      const response = await fetch("/register",
+      const response = await fetch(serverPath+"/register",
         {method: "POST", credentials:"include", headers: {"Content-Type":"application/json"}, body:JSON.stringify({name,email,username,password})});
    //   const jsonResponse = await response.json();
       dispatch({type: 'auth/register'});//, payload: jsonResponse});
@@ -13,7 +15,7 @@ export const register = (user) => {
 export const login = (username,password) => {
   return async (dispatch, getState) => {
     const reqBody = JSON.stringify({username,password});
-    const response = await fetch("/login",
+    const response = await fetch(serverPath+"/login",
       {method: "POST", credentials:"include", headers: {"Content-Type":"application/json", "Connection": "keep-alive"}, body:reqBody});
     const jsonResponse = await response.json();
     dispatch({type: 'auth/login', payload: jsonResponse});
@@ -30,7 +32,7 @@ export const checkLogin = () => {
   return async (dispatch, getState) => {
     let response;
     try {
-      response = await fetch("/user", {credentials:"include"});
+      response = await fetch(serverPath+"/user", {credentials:"include"});
     } catch (err) {console.log(err)}
       if (response.ok) {
         const jsonResponse = await response.json();
@@ -43,7 +45,7 @@ export const checkLogin = () => {
 
 export const getUserAccount = (username) => {
   return async (dispatch, getState) => {
-    const response = await fetch("/user/"+username, {credentials:"include"});
+    const response = await fetch(serverPath+"/user/"+username, {credentials:"include"});
     if (response.ok) {
       const jsonResponse = await response.json();
       dispatch({type: 'auth/getUserAccount', payload: jsonResponse});
