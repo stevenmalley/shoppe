@@ -14,7 +14,6 @@ export const addToCart = (productID, quantity) => {
             {method:"POST", headers: {"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({productID,quantity})});
         const jsonResponse = await response.json();
         if (!jsonResponse.message) dispatch({type: 'cart/addToCart', payload: jsonResponse});
-        else if (jsonResponse.message === "insufficient quantity in stock") dispatch({type: 'cart/insufficientQuantity', payload: productID});
     }
 }
 

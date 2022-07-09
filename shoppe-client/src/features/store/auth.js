@@ -6,8 +6,11 @@ export const register = (user) => {
       const {name,email,username,password} = user;
       const response = await fetch(serverPath+"/register",
         {method: "POST", credentials:"include", headers: {"Content-Type":"application/json"}, body:JSON.stringify({name,email,username,password})});
-   //   const jsonResponse = await response.json();
-      dispatch({type: 'auth/register'});//, payload: jsonResponse});
+      const jsonResponse = await response.json();
+      if (jsonResponse.message === "User created") {
+        dispatch({type: 'auth/register'});//, payload: jsonResponse});
+        dispatch(login(user.username,user.password));
+      }
     }
   }
 };
@@ -48,7 +51,7 @@ export const getUserAccount = (username) => {
     const response = await fetch(serverPath+"/user/"+username, {credentials:"include"});
     if (response.ok) {
       const jsonResponse = await response.json();
-      dispatch({type: 'auth/getUserAccount', payload: jsonResponse});
+      if (jsonResponse.name) dispatch({type: 'auth/getUserAccount', payload: jsonResponse});
     }
   }
 };

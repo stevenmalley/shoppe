@@ -35,6 +35,7 @@ function Login() {
         <br />
         <input type="submit" value="SUBMIT" />
       </form>
+      {auth.failed ? <div style={{color:"red",fontWeight:"bold"}}>LOGIN FAILED</div> : ""}
     </div>
   );
 }

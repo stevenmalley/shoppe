@@ -1,19 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { login, register } from './store/auth';
+import { register } from './store/auth';
 
 function Register() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  async function handleRegister(user) {
+  function handleRegister(user) {
     user = {name: user.name.value,
       email: user.email.value,
       username: user.username.value,
       password: user.password.value};
-    await dispatch(register(user));
-    await dispatch(login(user.username,user.password));
+    dispatch(register(user));
     navigate("/");
   }
 

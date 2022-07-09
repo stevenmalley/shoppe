@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCart, getCart, addToCart, modifyCart, removeFromCart } from './store/cart.js';
-import { selectAuth } from './store/auth.js';
+import { selectAuth, checkLogin } from './store/auth.js';
 import './Cart.css';
 
 const ModifyCart = (props) => {
@@ -17,13 +17,8 @@ const ModifyCart = (props) => {
   }
   const cartQuantity = getCartQuantity();
 
-  function getProductInsufficient() {
-    // if there is insufficient quantity in stock, the product will have .insufficient = true
-    let cartProduct = cart.find(product => product.id == props.productID);
-    if (cartProduct) return cartProduct.insufficient;
-  }
-
   function addToCartHandler() {
+    dispatch(checkLogin()); // log out if session has timed out
     dispatch(addToCart(props.productID,1));
   }
 
@@ -32,6 +27,7 @@ const ModifyCart = (props) => {
   }
 
   function removeFromCartHandler() {
+    dispatch(checkLogin()); // log out if session has timed out
     dispatch(removeFromCart(props.productID));
   }
 
@@ -43,7 +39,6 @@ const ModifyCart = (props) => {
           <button onClick={addToCartHandler}>add to cart</button> :
           <button onClick={removeFromCartHandler}>remove from cart</button>
         }
-        {getProductInsufficient() ? "insufficient quantity in stock" : ""}
       </div>
     );
   } else return <div></div>;

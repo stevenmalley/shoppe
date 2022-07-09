@@ -13,11 +13,7 @@ const cartOptions = {
     modifyCart:(cart,action) => {},
     removeFromCart:(cart,action) => cart.filter(product => product.id != action.payload.productID),
     purchaseCart:(cart,action) => cart.filter(product => !action.payload.products.some(p => p.product_id === product.id)),
-    clearCart:(cart,action) => [],
-    insufficientQuantity:(cart,action) => {
-      const product = cart.find(p => p.id === action.payload.productID);
-      if (product) product.insufficient = true;
-    }
+    clearCart:(cart,action) => []
   }
 }
 

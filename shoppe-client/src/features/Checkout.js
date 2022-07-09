@@ -29,12 +29,14 @@ const Checkout = () => {
       console.log(result.error.message);
     } else {
       // Your customer will be redirected to your `return_url`.
+      console.log(result);
       dispatch(purchaseCart());
     }
   };
 
   return (
       <form onSubmit={handleSubmit}>
+        <div style={{color:"grey",fontSize:"0.8em",marginTop:30}}>test number: 4000056655665556</div>
         <PaymentElement id="shoppeStripe" />
         <button id="buyButton" disabled={!stripe}>BUY</button>
       </form>

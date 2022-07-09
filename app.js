@@ -109,7 +109,7 @@ function authenticate(req,res,next) {
   res.status(200).send({"message":"NOT AUTHENTICATED"});
 }
 function authenticateAdmin(req,res,next) {
-  if (req.isAuthenticated() && req.user.username == 'admin') return next();
+  if (req.isAuthenticated() && req.user.username === 'admin') return next();
   res.status(200).send({"message":"only admin can perform this function!"});
 }
 
@@ -128,7 +128,7 @@ app.post("/register", async (req, res) => {
   const password_hash = await passwordHash(password);
   userDB.createUser({ name, email, username, password_hash }, (status,msg) => {
     req.logout(null,()=>{});
-    res.status(status).send(msg);});
+    res.status(status).send({message:msg});});
 });
 
 app.get("/login", // OBSOLETE ??
@@ -373,7 +373,7 @@ app.get("/cart/checkout", // buy contents of cart
       let quantityResult;
       quantityResult = await shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`);
       
-      if (quantityResult.quantity < sale.quantity) salesRemaining--;
+      if (quantityResult.rows[0].quantity < sale.quantity) salesRemaining--;
       else {
 
         // delete cart record
@@ -397,71 +397,6 @@ app.get("/cart/checkout", // buy contents of cart
     }
   }
 );
-
-/*
-
-app.get("/cart/checkout", // buy contents of cart
-  authenticate,
-  (req,res,next) => {
-    const customerID = req.user.id;
-
-    shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${customerID}`, (error, result) => {
-      if (error) throw error;
-
-      const sales = result.rows;
-      let salesRemaining = sales.length; // used to track the processing of purchases
-
-      // get new purchase ID
-      shoppePool.query("SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM purchase", (error,result) => {
-        if (error) throw error;
-
-        const newPurchaseID = result.rows[0].case;
-        const dateString = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-        // create purchase object
-        shoppePool.query(`INSERT INTO purchase VALUES (${newPurchaseID},${customerID},'${dateString}')`, (error,result) => {
-          if (error) throw error;
-
-          for (const sale of sales) {
-            // check sufficient stock quantity
-            shoppePool.query(`SELECT quantity FROM product WHERE id = ${sale.product_id}`, (error,result) => {
-              if (error) throw error;
-              
-              stockQuantity = result.rows[0].quantity;
-              if (stockQuantity >= sale.quantity) {
-                // delete cart record
-                shoppePool.query(`DELETE FROM cart WHERE customer_id = ${customerID} AND product_id = ${sale.product_id}`, (error, result) => {
-                  if (error) throw error;
-
-                  // reduce stock quantity
-                  shoppePool.query(`UPDATE product SET quantity = quantity-${sale.quantity} WHERE id = ${sale.product_id}`, (error,result) => {
-                    if (error) throw error;
-
-                    // add sale record
-                    const newSaleIDquery = "SELECT CASE WHEN MAX(id) IS NULL THEN 1 WHEN MAX(id) IS NOT NULL THEN MAX(id)+1 END FROM sale";
-                    shoppePool.query(`INSERT INTO sale VALUES((${newSaleIDquery}), ${sale.quantity}, ${newPurchaseID}, ${sale.product_id})`, (error,result) => {
-                      if (error) throw error;
-
-                      salesRemaining--;
-                      sale.sold = true;
-                      if (salesRemaining === 0) {
-                        const sold = sales.filter(s => s.sold).map(s => ({product_id:s.product_id,quantity:s.quantity}));
-                        const salesStatus = sold.length === sales.length ? "complete" : "partial";
-                        res.status(201).send({message:"transaction successful",salesStatus,products:sold});
-                      }
-                    });
-                  });
-                });
-              } else salesRemaining--;
-            });
-          }
-        });
-      });
-    });
-  }
-);
-
-*/
 
 app.use("/orders",authenticate);
 app.get("/orders",
@@ -517,6 +452,7 @@ app.post("/create-payment-intent", async (req, res) => {
     clientSecret: paymentIntent.client_secret,
   });
 });
+
 /*******************************************************************/
 
 

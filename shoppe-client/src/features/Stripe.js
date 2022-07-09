@@ -1,5 +1,3 @@
-//import { useDispatch } from 'react-redux';
-//import { purchaseCart } from './store/cart.js';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCart } from './store/cart.js';
@@ -36,21 +34,6 @@ const Stripe = () => {
         <Checkout />
       </Elements> 
     : "loading...";
-
-/*
-  const dispatch = useDispatch();
-
-  async function purchaseHandler() {
-    dispatch(purchaseCart());
-  }
-  
-  return (
-    <div>
-      <PaymentElement />
-      <button onClick={purchaseHandler}>BUY</button>
-    </div>
-  );
-*/
 
 }
 
