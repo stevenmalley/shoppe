@@ -428,7 +428,7 @@ app.get("/orders/:orderID",
 
 // STRIPE
 
-const stripe = require("stripe")('sk_test_51LJDsuEAyHGdNsJokOIv5h29yt3lyaCYw8J3yuVmuzgHYAY3piKtshLHrmfIf9VNOryOsSUgyiP0KPWZa0dGrEs700VocBGswD');
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 const calculateOrderAmount = (items) => {
   const amount = items.reduce((a,b) => a + (b.quantity * 100 * b.price.slice(1)), 0);
