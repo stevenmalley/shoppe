@@ -21,15 +21,13 @@ module.exports = passport => {
     const payload = await verify(req.body.credential).catch(console.error);
     
     if (payload.email_verified) {
-      console.log("google log in");
       req.body.username = "SIGN IN WITH GOOGLE";
       req.body.password = JSON.stringify({name:payload.name,email:payload.email,sub:payload.sub});
       return next();
     }
   },
-  (req,res,next) => {console.log("pre authenticated",req.body);return next();},
   passport.authenticate("local", {failureRedirect: "/user"}),
-  (req,res) => {console.log("post authenticated",req.body);res.redirect("/user");});
+  (req,res) => {res.redirect("/user");});
 
   return googleRouter;
 }

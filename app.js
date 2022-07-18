@@ -76,7 +76,6 @@ app.use(passport.session());
 const LocalStrategy = require("passport-local").Strategy;
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    console.log("passport strategy",username);
     if (username === "SIGN IN WITH GOOGLE" && Object.keys(JSON.parse(password)).every(key => ["name","email","sub"].includes(key))) { // from googleRouter. 'password' used to hold "sign in with google" credential
       userDB.googleLoginOrRegister(JSON.parse(password), async (err, user) => {
         if(err) return done(err);
