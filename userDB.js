@@ -44,6 +44,18 @@ module.exports.findByUsername = function(username, cb) {
     });
 }
 
+module.exports.googleLoginOrRegister = async function(googleUser, cb) {
+    const userInfo = await pool.query(`SELECT * FROM customer WHERE username = '${googleUser.sub}'`);
+    if (userInfo.rows.length === 0) {
+        // save googleUser info
+        await pool.query(`INSERT INTO customer (name,email,username,password_hash,google_account) VALUES ('${googleUser.name}', '${googleUser.email}', '${googleUser.sub}', NULL, TRUE)`);
+        const findID = await pool.query(`SELECT * FROM customer WHERE username = '${googleUser.sub}'`);
+        cb(null,findID.rows[0]);
+    } else {
+        cb(null,userInfo.rows[0]);
+    }
+}
+
 /*
 userDB.findById(id, function (err, user) { // Look up user id in database
     if (err) return done(err);

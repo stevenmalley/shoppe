@@ -25,6 +25,16 @@ export const login = (username,password) => {
   }
 };
 
+export const googleSignIn = (googleResponse) => {
+  return async (dispatch, getState) => {
+    const response = await fetch(serverPath+"/googleLogin",
+      {method:"POST", headers: {"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({credential:googleResponse.credential})});
+    const jsonResponse = await response.json();
+    console.log(jsonResponse);
+    dispatch({type: 'auth/login', payload: jsonResponse});
+  }
+}
+
 /** AUTOMATIC LOGIN FOR TESTING */
 export const checkLogin0 = () => {
   return login("mary","mary0");

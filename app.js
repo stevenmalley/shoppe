@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config(); // sets process.env with constants from .env
 
 const cors = require("cors");
-const whitelist = [undefined,'http://localhost:3000','http://localhost:8080','https://ye-shoppe.herokuapp.com'];
+const whitelist = [undefined,'http://localhost:3000','http://localhost:8080','http://ye-shoppe.herokuapp.com','https://ye-shoppe.herokuapp.com'];
 const corsOptions = {
   credentials: true, // This is important.
   origin: (origin, callback) => {
@@ -69,12 +69,6 @@ const PORT = process.env.PORT || 8080;
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-
-app.use((req,res,next) => {
-  console.log(req.method,req.path,req.body);
-  return next();
-});
-
 const passport = require("passport");
 app.use(passport.initialize());
 app.use(passport.session());
@@ -82,17 +76,24 @@ app.use(passport.session());
 const LocalStrategy = require("passport-local").Strategy;
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    userDB.findByUsername(username, async (err, user) => { // Look up user in the db
-      if(err) return done(err); // If there's an error in db lookup, return err callback function
-      if(!user) return done(null, false); // If user not found, return null and false in callback
-      if (user.google_account) return done(null, false); // If user is a google account, it will not have a local password; do not allow login locally
-      const passwordCheck = await comparePasswords(password, user.password_hash);
-      if(!passwordCheck) return done(null, false); // If user found, but password not valid, return err and false in callback
-      return done(null, user); // If user found and password valid, return the user object in callback
-    });
+    console.log("passport strategy",username);
+    if (username === "SIGN IN WITH GOOGLE" && Object.keys(JSON.parse(password)).every(key => ["name","email","sub"].includes(key))) { // from googleRouter. 'password' used to hold "sign in with google" credential
+      userDB.googleLoginOrRegister(JSON.parse(password), async (err, user) => {
+        if(err) return done(err);
+        return done(null, user);
+      });
+    } else {
+      userDB.findByUsername(username, async (err, user) => { // Look up user in the db
+        if(err) return done(err); // If there's an error in db lookup, return err callback function
+        if(!user) return done(null, false); // If user not found, return null and false in callback
+        if (user.google_account) return done(null, false); // If user is a google account, it will not have a local password; do not allow login locally
+        const passwordCheck = await comparePasswords(password, user.password_hash);
+        if(!passwordCheck) return done(null, false); // If user found, but password not valid, return err and false in callback
+        return done(null, user); // If user found and password valid, return the user object in callback
+      });
+    }
   })
 );
-
 
 passport.serializeUser((user,done) => {
   done(null,user.id); // sets the id as the user's browser cookie and stores it in req.session.passport.user.id
@@ -114,6 +115,13 @@ function authenticateAdmin(req,res,next) {
 }
 
 
+
+
+
+app.use((req,res,next) => {
+  console.log(req.method,req.path,Object.keys(req.body));
+  return next();
+});
 
 app.use(express.static("shoppe-client/build"));
 
@@ -457,6 +465,19 @@ app.post("/create-payment-intent", async (req, res) => {
 
 
 
+// GOOGLE OAUTH
+
+app.get("/scripts/googleLoginScript",
+  (req,res,next) => {
+    res.sendFile("/scripts/googleLoginScript.js", {root:__dirname});
+  }
+);
+
+const googleRouter = require("./googleRouter.js")(passport);
+app.use("/googleLogin",googleRouter);
+
+
+/*********************************************************************/
 
 
 

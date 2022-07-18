@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAuth, login } from './store/auth';
 import { getCart } from './store/cart';
 import { getOrders } from './store/orders';
+import GoogleLogin from './GoogleLogin'
 
 function Login() {
 
@@ -36,6 +37,7 @@ function Login() {
         <input type="submit" value="SUBMIT" />
       </form>
       {auth.failed ? <div style={{color:"red",fontWeight:"bold"}}>LOGIN FAILED</div> : ""}
+      <GoogleLogin />
     </div>
   );
 }
