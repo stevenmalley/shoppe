@@ -1,45 +1,69 @@
+:root {
+  --primary: #dbba90;
+  --darkTheme: #3b0000;
+}
+
 body {
   margin: 0;
   font-family: Verdana, sans-serif;
+  background: #eee;
 }
-
 .App {
   text-align: center;
 }
 
-.shoppeHeader h1 {
-  color: brown;
-}
 
-.shoppeHeader h2 {
-  color: chocolate;
+/* AUTHORISATION BAR */
+.authBar {
+  padding: 6px 0;
+  background: linear-gradient(#555, #888 85%, #555);
+  color: white;
 }
-
 .authDetails {
-  padding: 10px;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-weight: bold;
+  text-decoration: none;
+  background: linear-gradient(45deg, #333 20%, #aaa);
+  box-shadow: 1px 1px 1px 1px #666;
+  border: 1px solid #222;
+  border-radius: 10px;
+  color: white;
+}
+.authDetails:hover {
+  background: linear-gradient(45deg, #111, #888);
 }
 
-header {
-  margin: 10px 0;
+
+/* HEADER */
+.shoppeHeader {
+  margin-bottom: 20px;
+}
+.shoppeHeader a {
+  text-decoration: none;
+}
+.shoppeHeader h1 {
+  color: var(--darkTheme);
+}
+.shoppeHeader h2 {
+  color: #505050;
 }
 
 #headerTitle {
-  width: 800px;
-  height: 150px;
-  position: relative;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(to top, var(--primary), #fffadd 85%, #937e5c);
+  padding: 10px;
+  box-shadow: 0 4px 3px #896a54;
 }
 
 #headings {
-  width: 400px;
-  position: absolute;
-  left: 200px;
   padding-bottom: 20px;
 }
 
 #headerImage {
-  position: absolute;
-  left: 20px;
+  margin-right: 40px;
 }
 
 #headerImage img {
@@ -50,45 +74,28 @@ header {
 .navigation {
   padding: 10px;
   margin: 0 10px;
-  background-color: #555;
-  color: white;
+  background-color: #a58772;
+  color: var(--darkTheme);
   display: inline-block;
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   min-width: 110px;
-  text-decoration: none;
   font-weight: bold;
+  box-shadow: 2px 2px 2px #896a54;
 }
 
 .navigation:hover {
-  background-color: #777;
-  text-decoration: underline;
+  background: linear-gradient(var(--primary), #ffe8cd);
 }
 
 .navigation-active {
-  background-color: brown;
-}
-
-.navigation-active:hover {
-  background-color: chocolate;
+  background-color: var(--primary);
 }
 
 
-@media all and (max-width: 800px) {
-  #headerTitle {
-    width: 100%;
-    height: auto;
-  }
+
+@media all and (max-width: 600px) {
+  
   #headerImage {
-    position: static;
-    display: block;
-    padding: 0;
-  }
-  #headings {
-    position: static;
-    width: 100%;
-    display: block;
-  }
-  #headings h1 {
-    margin-top: 0;
+    display: none;
   }
 }

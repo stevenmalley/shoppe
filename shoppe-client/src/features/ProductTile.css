@@ -1,30 +1,29 @@
 .productTile {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
     width: 300px;
     min-height: 200px;
-    margin: 30px;
+    margin: 1%;
+    padding: 5px;
     border: 1px solid grey;
     text-decoration: none;
     color: #333;
+    background: white;
+    transition: background 0.5s;
 }
 
 .productTile:hover {
-    background-color: rgb(250, 252, 130);
+  background-color: #eecea4;
 }
 
 .productTile .productName {
     box-sizing: border-box;
-    float: left;
-    width: 60%;
     padding: 2% 5%;
     font-size: 1.15em;
 }
 
 .productTile .productDesc {
     box-sizing: border-box;
-    float: left;
-    width: 60%;
     padding: 20px 2%;
     text-align: left;
 }
@@ -38,7 +37,10 @@
 }
 
 .productTile img {
-    height: 150px;
-    width: 100px;
-    padding-top: 10px;
+  height: 150px;
+  width: 100px;
+  padding: 5px;
+  border: 1px solid #aaa;
+  margin: 2px;
+  background: white;
 }

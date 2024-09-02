@@ -13,7 +13,7 @@ function AuthDetails() {
 
   if (auth.login) {
     return (
-      <div>
+      <div className="authBar">
         <span>Welcome {auth.name}</span>
         <NavLink className="authDetails" to={"/cart"}>cart</NavLink>
         <NavLink className="authDetails" to={"/orders"}>order history</NavLink>
@@ -22,7 +22,7 @@ function AuthDetails() {
       </div>
     );
   } else return (
-    <div>
+    <div className="authBar">
       <NavLink className="authDetails" to="/register">register</NavLink>
       <NavLink className="authDetails" to="/login">log in</NavLink>
     </div>

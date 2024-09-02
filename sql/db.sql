@@ -4,7 +4,8 @@ CREATE TABLE customer (
   username TEXT,
   email TEXT,
   password_hash TEXT,
-  google_account boolean
+  google_account boolean,
+  client_secret TEXT
 );
 
 CREATE TABLE product (

@@ -4,7 +4,6 @@
 - set DB and server details in .env (see .env.example)
 - set path to server in client's serverPath.js
 
-
 ### Node modules used (backend): ###
 - express for the server, also:
   - dotenv
@@ -22,3 +21,10 @@
 - React Redux
 - Redux Toolkit
 - React Router v6
+
+### to run the application ###
+in shoppe:
+> node app.js
+
+in shoppe-client:
+> npm start

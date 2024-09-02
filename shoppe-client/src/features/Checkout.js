@@ -30,13 +30,14 @@ const Checkout = () => {
     } else {
       // Your customer will be redirected to your `return_url`.
       console.log(result);
-      dispatch(purchaseCart());
+      dispatch(purchaseCart(result.paymentIntent.client_secret));
     }
   };
 
   return (
       <form onSubmit={handleSubmit}>
-        <div style={{color:"grey",fontSize:"0.8em",marginTop:30}}>test number: 4000056655665556</div>
+        <div style={{color:"red",fontSize:"0.8em",marginTop:30}}>Please do not use real card details. Use this false number for testing.</div>
+        <div style={{color:"grey",fontSize:"0.8em",marginTop:5}}>test number: 4000056655665556</div>
         <PaymentElement id="shoppeStripe" />
         <button id="buyButton" disabled={!stripe}>BUY</button>
       </form>

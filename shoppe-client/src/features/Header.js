@@ -8,7 +8,7 @@ function Header() {
       <NavLink to="/">
         <div id="headerTitle">
           <div id="headerImage">
-            <img src={`${serverPath}/productImages/books`} />
+            <img src={`${serverPath}/productImages/books.png`} />
           </div>
           <div id="headings">
             <h1>Welcome to Shoppe</h1>

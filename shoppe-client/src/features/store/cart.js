@@ -30,9 +30,9 @@ export const removeFromCart = (productID) => {
     }
 }
 
-export const purchaseCart = () => {
+export const purchaseCart = (clientSecret) => {
     return async (dispatch, getState) => {
-        const response = await fetch(serverPath+'/cart/checkout', {credentials:"include"});
+        const response = await fetch(serverPath+'/cart/checkout/'+clientSecret, {credentials:"include"});
         const jsonResponse = await response.json();
         if (jsonResponse.message == "transaction successful") dispatch({type: 'cart/purchaseCart', payload: jsonResponse});
     }

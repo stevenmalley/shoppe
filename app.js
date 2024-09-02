@@ -141,7 +141,7 @@ app.post("/register", async (req, res) => {
 app.get("/login", // OBSOLETE ??
   (req,res,next) => {res.send({message:"login here"});});
 app.post("/login", // receives {username,password}
-  (req,res,next) => {req.logout(null,()=>{});next()}, // close a previous session
+  (req,res,next) => {req.logout(null,()=>{});next();}, // close a previous session
   passport.authenticate("local", {failureRedirect: "/user"}), // sets req.user
   (req,res) => {res.redirect("/user");});
 app.get("/logout", (req, res) => {
@@ -279,7 +279,7 @@ app.get("/product",
 
 app.get("/productImages/:filename",
   (req,res,next) => {
-    res.sendFile("/productImages/"+req.params.filename+".jpg", {root:__dirname});
+    res.sendFile("/productImages/"+req.params.filename, {root:__dirname});
   }
 );
 
@@ -353,13 +353,23 @@ app.delete("/cart", // remove item from cart, receives {productID}
     });
   }
 );
-app.get("/cart/checkout", // buy contents of cart
+app.get("/cart/checkout/:clientSecret", // buy contents of cart
   authenticate,
   async (req,res,next) => {
     const customerID = req.user.id;
 
-    let salesResult;
-    salesResult = await shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${customerID}`);
+    const { clientSecret } = req.params;
+
+    const secretCheck = await shoppePool.query(`SELECT client_secret FROM customer WHERE id = ${customerID}`);
+    if (!clientSecret || secretCheck.rows[0].client_secret !== clientSecret) {
+      res.status(201).send({message:"transaction failed: payment details not found"});
+      return;
+    }
+    shoppePool.query(`UPDATE customer SET client_secret = NULL WHERE id = '${customerID}'`, (error, result) => {
+      if (error) throw error;
+    });
+
+    let salesResult = await shoppePool.query(`SELECT * FROM cart WHERE customer_id = ${customerID}`);
 
     const sales = salesResult.rows;
     let salesRemaining = sales.length; // used to track the processing of purchases
@@ -443,8 +453,12 @@ const calculateOrderAmount = (items) => {
   return amount;
 };
 
-app.post("/create-payment-intent", async (req, res) => {
+
+app.post("/create-payment-intent/:username", async (req, res) => {
   const items = req.body.cart;
+
+  const { username } = req.params;
+  console.log(username);
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
@@ -455,9 +469,15 @@ app.post("/create-payment-intent", async (req, res) => {
     },
   });
 
-  res.send({
-    clientSecret: paymentIntent.client_secret,
-  });
+  if (paymentIntent.client_secret) {
+    shoppePool.query(`UPDATE customer SET client_secret = '${paymentIntent.client_secret}' WHERE username = '${username}'`, (error, result) => {
+      if (error) throw error;
+
+      res.status(200).send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+  }
 });
 
 /*******************************************************************/
