@@ -10,6 +10,8 @@ export const register = (user) => {
       if (jsonResponse.message === "User created") {
         dispatch({type: 'auth/register'});//, payload: jsonResponse});
         dispatch(login(user.username,user.password));
+      } else if (jsonResponse.message) {
+        alert(jsonResponse.message);
       }
     }
   }
