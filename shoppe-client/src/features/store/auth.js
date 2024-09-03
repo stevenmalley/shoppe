@@ -20,9 +20,10 @@ export const register = (user) => {
 export const login = (username,password) => {
   return async (dispatch, getState) => {
     const reqBody = JSON.stringify({username,password});
+    console.log(serverPath+"/login",reqBody);
     const response = await fetch(serverPath+"/login",
       {method: "POST", credentials:"include", headers: {"Content-Type":"application/json", "Connection": "keep-alive"}, body:reqBody});
-      console.log(response.text());
+    console.log(response.text());
     const jsonResponse = await response.json();
     dispatch({type: 'auth/login', payload: jsonResponse});
   }
