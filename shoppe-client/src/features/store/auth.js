@@ -22,7 +22,6 @@ export const login = (username,password) => {
     const reqBody = JSON.stringify({username,password});
     const response = await fetch(serverPath+"/login",
       {method: "POST", credentials:"include", headers: {"Content-Type":"application/json", "Connection": "keep-alive"}, body:reqBody});
-    console.log(response.text());
     const jsonResponse = await response.json();
     dispatch({type: 'auth/login', payload: jsonResponse});
   }
