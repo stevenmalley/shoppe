@@ -53,7 +53,7 @@ body {
 #headerTitle {
   display: flex;
   justify-content: center;
-  background: linear-gradient(to top, var(--primary), #fff0d0 85%, #937e5c);
+  background: linear-gradient(to top, var(--primary), #fff0d0 95%, #c1a67a);
   padding: 10px;
   box-shadow: 0 4px 3px #896a54;
 }
