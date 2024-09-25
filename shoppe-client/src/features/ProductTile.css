@@ -8,12 +8,13 @@
     border: 1px solid grey;
     text-decoration: none;
     color: #333;
-    background: white;
-    transition: background 0.5s;
+    background-color: white;
+    transition: background-color 1s;
 }
 
-.productTile:hover {
-  background-color: #eecea4;
+.productTile.focusedTile {
+  background-color: #ffebd2;
+  transition: background-color 0.3s;
 }
 
 .productTile .productName {
