@@ -37,7 +37,7 @@ function Login() {
           </tr>
           <tr>
             <th><label htmlFor="password">password</label></th>
-            <td><input type="text" name="password" id="password" /></td>
+            <td><input type="password" name="password" id="password" /></td>
           </tr>
         </table>
         <input type="submit" value="SUBMIT" className="shoppeButton" />

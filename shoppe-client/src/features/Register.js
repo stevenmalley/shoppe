@@ -52,7 +52,7 @@ function Register() {
             <label htmlFor="password">password </label>
           </th>
           <td>
-            <input type="text" name="password" id="password" />
+            <input type="password" name="password" id="password" />
           </td>
         </tr>
       </table>
