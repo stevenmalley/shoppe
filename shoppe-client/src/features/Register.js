@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { register } from './store/auth';
+import './Authorisation.css';
 
 function Register() {
 
@@ -20,16 +21,42 @@ function Register() {
     <form onSubmit={async(event)=>{
       event.preventDefault();
       handleRegister(event.target);
-    }}>
-      <label htmlFor="name">NAME: </label><input type="text" name="name" id="name" />
-      <br />
-      <label htmlFor="email">EMAIL: </label><input type="text" name="email" id="email" />
-      <br />
-      <label htmlFor="username">USERNAME: </label><input type="text" name="username" id="username" />
-      <br />
-      <label htmlFor="password">PASSWORD: </label><input type="text" name="password" id="password" />
-      <br />
-      <input type="submit" value="SUBMIT" />
+    }} className="authorisationForm">
+      <table>
+        <tr>
+          <th>
+            <label htmlFor="name">name </label>
+          </th>
+          <td>
+            <input type="text" name="name" id="name" />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label htmlFor="email">email </label>
+          </th>
+          <td>
+          <input type="text" name="email" id="email" />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label htmlFor="username">username </label>
+          </th>
+          <td>
+            <input type="text" name="username" id="username" />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <label htmlFor="password">password </label>
+          </th>
+          <td>
+            <input type="text" name="password" id="password" />
+          </td>
+        </tr>
+      </table>
+      <input type="submit" value="SUBMIT" className="shoppeButton" />
     </form>
   );
 }

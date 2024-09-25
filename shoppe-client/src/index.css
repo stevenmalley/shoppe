@@ -91,6 +91,19 @@ body {
   background-color: var(--primary);
 }
 
+.shoppeButton {
+  border: 1px solid #aaa;
+  background-color: #f0cfaa;
+  padding: 5px 10px 2px;
+  margin: 10px 0;
+  border-radius: 10px;
+  font-size: 1.2em;
+  box-shadow: 1px 1px 1px 1px var(--darkTheme);
+}
+.shoppeButton:hover {
+  background-color: #f5ddc1;
+}
+
 
 
 @media all and (max-width: 600px) {

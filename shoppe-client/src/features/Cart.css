@@ -36,6 +36,8 @@
   font-weight: bold;
   font-size: 25px;
   padding: 5px 10px;
+  border: 1px solid #333;
+  border-radius: 10px;
 }
 
 #buyButton:hover {

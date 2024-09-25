@@ -29,12 +29,18 @@ function Login() {
       <form onSubmit={async(event)=>{
         event.preventDefault();
         handleLogin(event.target.username.value,event.target.password.value);
-      }}>
-        <label htmlFor="username">USERNAME: </label><input type="text" name="username" id="username" />
-        <br />
-        <label htmlFor="password">PASSWORD: </label><input type="text" name="password" id="password" />
-        <br />
-        <input type="submit" value="SUBMIT" />
+      }} className="authorisationForm">
+        <table>
+          <tr>
+            <th><label htmlFor="username">username</label></th>
+            <td><input type="text" name="username" id="username" /></td>
+          </tr>
+          <tr>
+            <th><label htmlFor="password">password</label></th>
+            <td><input type="text" name="password" id="password" /></td>
+          </tr>
+        </table>
+        <input type="submit" value="SUBMIT" className="shoppeButton" />
       </form>
       {auth.failed ? <div style={{color:"red",fontWeight:"bold"}}>LOGIN FAILED</div> : ""}
       <GoogleLogin />
