@@ -26,8 +26,8 @@ module.exports = passport => {
       return next();
     }
   },
-  passport.authenticate("local", {failureRedirect: "/user"}),
-  (req,res) => {res.redirect("/user");});
+  passport.authenticate("local", {failureRedirect: "/api/user"}),
+  (req,res) => {res.redirect("/api/user");});
 
   return googleRouter;
 }
