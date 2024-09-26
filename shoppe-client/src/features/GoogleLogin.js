@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { googleSignIn } from './store/auth';
-import serverPath from '../serverPath.js';
+import { scriptPath } from '../serverPath.js';
 
 function GoogleLogin() {
 
@@ -35,7 +35,7 @@ function GoogleLogin() {
           document.googleSignInCallback = signInCallback;
           let googleCallback = document.createElement("script");
           googleCallback.id = "googleCallbackScript"
-          googleCallback.src = serverPath+"/scripts/googleLoginScript";
+          googleCallback.src = scriptPath+"/googleLoginScript";
           googleCallback.async = true;
           googleCallback.defer = true;
           document.body.appendChild(googleCallback);

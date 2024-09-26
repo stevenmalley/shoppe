@@ -23,38 +23,40 @@ function Register() {
       handleRegister(event.target);
     }} className="authorisationForm">
       <table>
-        <tr>
-          <th>
-            <label htmlFor="name">name </label>
-          </th>
-          <td>
-            <input type="text" name="name" id="name" />
-          </td>
-        </tr>
-        <tr>
-          <th>
-            <label htmlFor="email">email </label>
-          </th>
-          <td>
-          <input type="text" name="email" id="email" />
-          </td>
-        </tr>
-        <tr>
-          <th>
-            <label htmlFor="username">username </label>
-          </th>
-          <td>
-            <input type="text" name="username" id="username" />
-          </td>
-        </tr>
-        <tr>
-          <th>
-            <label htmlFor="password">password </label>
-          </th>
-          <td>
-            <input type="password" name="password" id="password" />
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <th>
+              <label htmlFor="name">name </label>
+            </th>
+            <td>
+              <input type="text" name="name" id="name" />
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label htmlFor="email">email </label>
+            </th>
+            <td>
+            <input type="text" name="email" id="email" />
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label htmlFor="username">username </label>
+            </th>
+            <td>
+              <input type="text" name="username" id="username" />
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label htmlFor="password">password </label>
+            </th>
+            <td>
+              <input type="password" name="password" id="password" />
+            </td>
+          </tr>
+        </tbody>
       </table>
       <input type="submit" value="SUBMIT" className="shoppeButton" />
     </form>

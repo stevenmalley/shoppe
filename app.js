@@ -123,14 +123,23 @@ app.use((req,res,next) => {
 });
 
 app.use(express.static("shoppe-client/build"));
+if (process.env.DEVELOPMENT !== "true") {
+  app.get(/^((?!^\/api\/|^\/scripts\/).)*$/, // any path except those beginning with "/api/" or "/scripts/", redirect to index.html for React Router to handle
+    (req, res) => {
+      res.sendFile(path.join(__dirname, 'shoppe-client/build/index.html'));
+    }
+  );
+}
 
-app.get("/home",
+
+
+app.get("/api/home",
   (req,res,next) => {
     res.status(200).send({"message":"Welcome to Shoppe"});
   }
 );
 
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   const { name, email, username, password } = req.body;
   const password_hash = await passwordHash(password);
   userDB.createUser({ name, email, username, password_hash }, (status,msg) => {
@@ -138,24 +147,24 @@ app.post("/register", async (req, res) => {
     res.status(status).send({message:msg});});
 });
 
-app.get("/login", // OBSOLETE ??
+app.get("/api/login", // OBSOLETE ??
   (req,res,next) => {res.send({message:"login here"});});
-app.post("/login", // receives {username,password}
+app.post("/api/login", // receives {username,password}
   (req,res,next) => {req.logout(null,()=>{});next();}, // close a previous session
   passport.authenticate("local", {failureRedirect: "/user"}), // sets req.user
   (req,res) => {res.redirect("/user");});
-app.get("/logout", (req, res) => {
+app.get("/api/logout", (req, res) => {
   req.logout(null,()=>{});
   res.send({message:"logged out"});
 });
 
-app.get("/user", // used for checking login (NB requires cookie)
+app.get("/api/user", // used for checking login (NB requires cookie)
   authenticate,
   (req,res,next) => {
     res.status(200).send({"message":"AUTHENTICATED","username":req.user.username,"name":req.user.name});
   }
 );
-app.get("/user/:username",
+app.get("/api/user/:username",
   authenticate,
   (req,res,next) => { // only allows a user to view their own profile
     if (req.user.username === req.params.username) return next();
@@ -166,7 +175,7 @@ app.get("/user/:username",
     res.status(200).send({name,email,username});
   }
 );
-app.put("/user/:username", // receives any of {name,email,username,password}
+app.put("/api/user/:username", // receives any of {name,email,username,password}
   authenticate,
   (req,res,next) => { // only allows a user to change their own user details
     if (req.user.username === req.params.username) return next();
@@ -181,7 +190,7 @@ app.put("/user/:username", // receives any of {name,email,username,password}
       res.send({"message":changeMessage});});
   }
 );
-app.delete("/user/:username", // receives {password}
+app.delete("/api/user/:username", // receives {password}
   authenticate,
   async (req,res,next) => { // only allows a user to delete their own user account
     const passwordCheck = await comparePasswords(req.body.password, req.user.password_hash);
@@ -197,7 +206,7 @@ app.delete("/user/:username", // receives {password}
 
 
 // receive a product object: {name,description,quantity,price,author} and create a new product record UNLESS name, description, price and author match a pre-existing product.
-app.post("/admin",
+app.post("/api/admin",
   authenticateAdmin,
   (req,res,next) => {
     const {name,description,quantity,price,author} = req.body;
@@ -223,7 +232,7 @@ app.post("/admin",
 );
 
 // if id matches a record in the db, amend any attributes (name, description, quantity, price, author)
-app.put("/admin/:id",
+app.put("/api/admin/:id",
   authenticateAdmin,
   (req,res,next) => {
     let {name,description,quantity,price,author} = req.body;
@@ -248,7 +257,7 @@ app.put("/admin/:id",
   }
 );
 
-app.delete("/admin/:id",
+app.delete("/api/admin/:id",
   authenticateAdmin,
   (req,res,next) => {
     const id = req.params.id;
@@ -261,13 +270,13 @@ app.delete("/admin/:id",
 );
 
 
-app.get("/product/:id",
+app.get("/api/product/:id",
   async (req,res,next) => {
     const result = await shoppePool.query(`SELECT id,name,author,price,description,image FROM product WHERE id = ${req.params.id}`);
     res.status(200).send(result.rows[0]);
   }
 );
-app.get("/product",
+app.get("/api/product",
   (req,res,next) => {
     shoppePool.query('SELECT id,name,price,description,image FROM product', (error, result) => {
       if (error) throw error;
@@ -277,14 +286,14 @@ app.get("/product",
   }
 );
 
-app.get("/productImages/:filename",
+app.get("/api/productImages/:filename",
   (req,res,next) => {
     res.sendFile("/productImages/"+req.params.filename, {root:__dirname});
   }
 );
 
-app.use("/cart",authenticate);
-app.get("/cart",
+app.use("/api/cart",authenticate);
+app.get("/api/cart",
   async (req,res,next) => {
     //const cartData = await shoppePool.query(`SELECT * FROM carp WHERE customer_id = ${req.user.id}`);
     
@@ -308,7 +317,7 @@ app.get("/cart",
     res.status(200).send(cart);
   }
 );
-app.post("/cart", // add item to cart, receives {productID,quantity}
+app.post("/api/cart", // add item to cart, receives {productID,quantity}
   (req,res,next) => {
     if (!isNaN(req.body.productID) && !isNaN(req.body.quantity) && req.body.quantity > 0) {
       shoppePool.query(`SELECT name,price,quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
@@ -327,7 +336,7 @@ app.post("/cart", // add item to cart, receives {productID,quantity}
     } else res.status(400).send({message:"invalid productID or quantity"});
   }
 );
-app.put("/cart", // modify item quantity, receives {productID,quantity}
+app.put("/api/cart", // modify item quantity, receives {productID,quantity}
   (req,res,next) => {
     if (!isNaN(req.body.productID) && !isNaN(req.body.quantity) && req.body.quantity > 0) {
       shoppePool.query(`SELECT quantity FROM product WHERE id = ${req.body.productID}`, (error, result) => {
@@ -344,7 +353,7 @@ app.put("/cart", // modify item quantity, receives {productID,quantity}
     } else res.status(400).send({message:"invalid productID or quantity"});
   }
 );
-app.delete("/cart", // remove item from cart, receives {productID}
+app.delete("/api/cart", // remove item from cart, receives {productID}
   (req,res,next) => {
     shoppePool.query(`DELETE FROM cart WHERE customer_id = ${req.user.id} AND product_id = ${req.body.productID}`, (error, result) => {
       if (error) throw error;
@@ -353,7 +362,7 @@ app.delete("/cart", // remove item from cart, receives {productID}
     });
   }
 );
-app.get("/cart/checkout/:clientSecret", // buy contents of cart
+app.get("/api/cart/checkout/:clientSecret", // buy contents of cart
   authenticate,
   async (req,res,next) => {
     const customerID = req.user.id;
@@ -415,8 +424,8 @@ app.get("/cart/checkout/:clientSecret", // buy contents of cart
   }
 );
 
-app.use("/orders",authenticate);
-app.get("/orders",
+app.use("/api/orders",authenticate);
+app.get("/api/orders",
   (req,res,next) => {
     shoppePool.query(`SELECT id,datetime FROM purchase WHERE customer_id = ${req.user.id}`, (error, result) => {
       if (error) throw error;
@@ -425,7 +434,7 @@ app.get("/orders",
     });
   }
 );
-app.get("/orders/:orderID",
+app.get("/api/orders/:orderID",
   (req,res,next) => {
     shoppePool.query(`SELECT * FROM purchase WHERE id = ${req.params.orderID} AND customer_id = ${req.user.id}`, (error, result) => {
       if (error) throw error;
@@ -454,7 +463,7 @@ const calculateOrderAmount = (items) => {
 };
 
 
-app.post("/create-payment-intent/:username", async (req, res) => {
+app.post("/api/create-payment-intent/:username", async (req, res) => {
   const items = req.body.cart;
 
   const { username } = req.params;

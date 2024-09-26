@@ -31,14 +31,16 @@ function Login() {
         handleLogin(event.target.username.value,event.target.password.value);
       }} className="authorisationForm">
         <table>
-          <tr>
-            <th><label htmlFor="username">username</label></th>
-            <td><input type="text" name="username" id="username" /></td>
-          </tr>
-          <tr>
-            <th><label htmlFor="password">password</label></th>
-            <td><input type="password" name="password" id="password" /></td>
-          </tr>
+          <tbody>
+            <tr>
+              <th><label htmlFor="username">username</label></th>
+              <td><input type="text" name="username" id="username" /></td>
+            </tr>
+            <tr>
+              <th><label htmlFor="password">password</label></th>
+              <td><input type="password" name="password" id="password" /></td>
+            </tr>
+          </tbody>
         </table>
         <input type="submit" value="SUBMIT" className="shoppeButton" />
       </form>
