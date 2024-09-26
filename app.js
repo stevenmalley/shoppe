@@ -503,7 +503,7 @@ app.get("/scripts/googleLoginScript",
 );
 
 const googleRouter = require("./googleRouter.js")(passport);
-app.use("/googleLogin",googleRouter);
+app.use("/api/googleLogin",googleRouter);
 
 
 /*********************************************************************/
