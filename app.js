@@ -152,8 +152,8 @@ app.get("/api/login", // OBSOLETE ??
   (req,res,next) => {res.send({message:"login here"});});
 app.post("/api/login", // receives {username,password}
   (req,res,next) => {req.logout(null,()=>{});next();}, // close a previous session
-  passport.authenticate("local", {failureRedirect: "/user"}), // sets req.user
-  (req,res) => {res.redirect("/user");});
+  passport.authenticate("local", {failureRedirect: "/api/user"}), // sets req.user
+  (req,res) => {res.redirect("/api/user");});
 app.get("/api/logout", (req, res) => {
   req.logout(null,()=>{});
   res.send({message:"logged out"});
