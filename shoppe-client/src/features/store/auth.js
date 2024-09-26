@@ -31,15 +31,11 @@ export const googleSignIn = (googleResponse) => {
   return async (dispatch, getState) => {
     const response = await fetch(serverPath+"/googleLogin",
       {method:"POST", headers: {"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({credential:googleResponse.credential})});
+    console.log(response.text());
     const jsonResponse = await response.json();
     dispatch({type: 'auth/login', payload: jsonResponse});
   }
 }
-
-/** AUTOMATIC LOGIN FOR TESTING */
-export const checkLogin0 = () => {
-  return login("mary","mary0");
-};
 
 /** REAL */
 export const checkLogin = () => {
