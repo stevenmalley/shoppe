@@ -15,8 +15,10 @@ const authOptions = {
       } else return {login:false,failed:true}; // failed used to display 'login attempt failed' message on Login page
     },
     checkLogin:(auth,action) => {
-      if (action.payload.message === "AUTHENTICATED" && action.payload.username === auth.username) {
+      if (action.payload.message === "AUTHENTICATED") {
         auth.login = true;
+        auth.username = action.payload.username;
+        auth.name = action.payload.name;
       } else return {login:false};
     },
     getUserAccount:(auth,action) => {

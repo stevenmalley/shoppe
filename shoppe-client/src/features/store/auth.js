@@ -64,7 +64,7 @@ export const getUserAccount = (username) => {
 
 export const logout = () => {
   return async (dispatch, getState) => {
-    await fetch("/logout", {credentials:"include"});
+    await fetch(serverPath+"/logout", {credentials:"include"});
     dispatch({type:"auth/logout"});
   }
 };

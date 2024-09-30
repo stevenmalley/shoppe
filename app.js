@@ -9,7 +9,7 @@ const cors = require("cors");
 // const whitelist = [undefined,'http://localhost:3000','http://localhost:8080','http://ye-shoppe.herokuapp.com','https://ye-shoppe.herokuapp.com','http://olde-shoppe-421300d4552b.herokuapp.com','https://olde-shoppe-421300d4552b.herokuapp.com'];
 const whitelist = [undefined,'http://localhost:3000','https://olde-shoppe-421300d4552b.herokuapp.com'];
 const corsOptions = {
-  credentials: true, // This is important.
+  credentials: true,
   origin: (origin, callback) => {
     if(whitelist.includes(origin)) return callback(null, true)
 
