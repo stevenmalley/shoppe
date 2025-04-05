@@ -1,6 +1,7 @@
 :root {
   --primary: #dbba90;
   --darkTheme: #3b0000;
+  --darkThemeHighlight: #b32a2a;
 }
 
 body {
@@ -19,20 +20,20 @@ body {
   background: linear-gradient(#555, #888 85%, #555);
   color: white;
 }
+.authButtons {
+  margin: 0 auto;
+  max-width: 1000px;
+  text-align: right;
+}
 .authDetails {
   display: inline-block;
-  padding: 10px 20px;
-  margin: 0 10px;
-  font-weight: bold;
+  padding: 10px;
+  margin: 0 5px;
   text-decoration: none;
-  background: linear-gradient(45deg, #333 20%, #aaa);
-  box-shadow: 1px 1px 1px 1px #666;
-  border: 1px solid #222;
-  border-radius: 10px;
   color: white;
 }
 .authDetails:hover {
-  background: linear-gradient(45deg, #111, #888);
+  color: #f3e4c8;
 }
 
 
@@ -47,6 +48,10 @@ body {
   color: var(--darkTheme);
 }
 .shoppeHeader h2 {
+  font-size: 0.8em;
+  font-weight: normal;
+  font-style: italic;
+  margin: 0;
   color: #505050;
 }
 
@@ -74,21 +79,17 @@ body {
 .navigation {
   padding: 10px;
   margin: 0 10px;
-  background-color: #a58772;
   color: var(--darkTheme);
   display: inline-block;
-  border-radius: 0 0 10px 10px;
   min-width: 110px;
-  font-weight: bold;
-  box-shadow: 2px 2px 2px #896a54;
 }
 
 .navigation:hover {
-  background: linear-gradient(var(--primary), #ffe8cd);
+  color: var(--darkThemeHighlight);
 }
 
 .navigation-active {
-  background-color: var(--primary);
+  color: var(--darkThemeHighlight);
 }
 
 .shoppeButton {
@@ -105,6 +106,16 @@ body {
 }
 
 
+
+/* PRODUCTS DISPLAY */
+
+#productsDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
 @media all and (max-width: 600px) {
   

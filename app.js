@@ -136,7 +136,7 @@ if (process.env.DEVELOPMENT !== "true") {
 
 app.get("/api/home",
   (req,res,next) => {
-    res.status(200).send({"message":"Welcome to Shoppe"});
+    res.status(200).send({"message":"Welcome to Ye Olde Online Shoppe"});
   }
 );
 

@@ -23,8 +23,10 @@ function AuthDetails() {
     );
   } else return (
     <div className="authBar">
-      <NavLink className="authDetails" to="/register">register</NavLink>
-      <NavLink className="authDetails" to="/login">log in</NavLink>
+      <div className="authButtons">
+        <NavLink className="authDetails" to="/register">register</NavLink>
+        <NavLink className="authDetails" to="/login">log in</NavLink>
+      </div>
     </div>
   );
 }

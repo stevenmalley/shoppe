@@ -16,10 +16,14 @@ export default function ProductTile(props) {
     return (
         <Link to={`/product/${props.product.id}`} className="productTile" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             <div>
-              <div className="productName">{props.product.name}</div>
-              <div className="productDesc">{props.product.description}</div>
+              <div>
+                <img src={serverPath+`/productImages/${props.product.image}.jpg`}  alt={props.product.name} />
+              </div>
+              <div>
+                <div className="productName">{props.product.name}</div>
+                <div className="productDesc">{props.product.description}</div>
+              </div>
             </div>
-            <img src={serverPath+`/productImages/${props.product.image}.jpg`}  alt={props.product.name} />
             <div className="productPrice">{props.product.price}</div>
         </Link>
     );
