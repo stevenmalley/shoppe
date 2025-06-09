@@ -43,14 +43,14 @@ export const checkLogin = () => {
     try {
       response = await fetch(serverPath+"/user", {credentials:"include"});
     } catch (err) {console.log(err)}
-      if (response.ok) {
-        const jsonResponse = await response.json();
-        dispatch({type: 'auth/checkLogin', payload: jsonResponse});
-      } else {
-        dispatch({type: 'auth/checkLogin', payload: {message:""}});
-      }
+    if (response.ok) {
+      const jsonResponse = await response.json();
+      dispatch({type: 'auth/checkLogin', payload: jsonResponse});
+    } else {
+      dispatch({type: 'auth/checkLogin', payload: {message:""}});
     }
-  };
+  }
+};
 
 export const getUserAccount = (username) => {
   return async (dispatch, getState) => {

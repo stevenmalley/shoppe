@@ -7,9 +7,9 @@ import { selectAuth, checkLogin } from './store/auth.js';
 function AuthDetails() {
 
   const auth = useSelector(selectAuth);
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
 
-  useEffect(()=>{dispatch(checkLogin())},[]);
+  //useEffect(()=>{dispatch(checkLogin())},[]);
 
   if (auth.login) {
     return (
