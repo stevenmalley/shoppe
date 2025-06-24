@@ -10,9 +10,12 @@ function Logout() {
   const dispatch = useDispatch();
 
   useEffect(()=>{
-    dispatch(logout())
-    dispatch(clearCart());
-    navigate("/");
+    async function logoutAsync() {
+      await dispatch(logout());
+      dispatch(clearCart());
+      navigate("/");
+    }
+    logoutAsync();
   },[]);
 
   return <div>logging out...</div>;
